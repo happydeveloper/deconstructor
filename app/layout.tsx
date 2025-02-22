@@ -22,11 +22,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
+    <html lang="ko" suppressHydrationWarning>
       <head>
         <PlausibleProvider
           domain="deconstructor.ayush.digital"
@@ -36,7 +36,7 @@ export default function RootLayout({
           taggedEvents
         />
       </head>
-      <body className={`${notoSerif.className} antialiased dark`}>
+      <body className={`${notoSerif.className} antialiased bluelight`}>
         <Outbound />
         {children}
         <Toaster />

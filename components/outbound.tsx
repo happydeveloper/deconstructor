@@ -1,23 +1,24 @@
-import { Button } from "@/components/ui/button";
-import { GithubIcon, HouseIcon, LucideProps, TwitterIcon } from "lucide-react";
-import Link from "next/link";
-import { RefAttributes } from "react";
+"use client";
+
+import { HouseIcon, GithubIcon, TwitterIcon } from "lucide-react";
+import ThemeToggle from "./theme-toggle";
 
 function OutboundButton({
   href,
   Icon,
 }: {
   href: string;
-  Icon: React.ForwardRefExoticComponent<
-    Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>
-  >;
+  Icon: React.ComponentType<{ size?: number }>;
 }) {
   return (
-    <Button size="icon" variant="outline">
-      <Link href={href}>
-        <Icon className="w-4 h-4" />
-      </Link>
-    </Button>
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="p-2 rounded-lg bg-gray-800 text-gray-200 hover:bg-gray-700 transition-colors"
+    >
+      <Icon size={20} />
+    </a>
   );
 }
 
@@ -26,6 +27,7 @@ export default function Outbound() {
     <div className="absolute top-5 right-5 z-50">
       <div className="flex gap-1">
         <OutboundButton href="https://ayush.digital" Icon={HouseIcon} />
+        <ThemeToggle />
         <OutboundButton
           href="https://github.com/hyusap/deconstructor"
           Icon={GithubIcon}

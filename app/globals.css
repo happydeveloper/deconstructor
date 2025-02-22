@@ -4,6 +4,8 @@
 
 body {
   font-family: Arial, Helvetica, sans-serif;
+  background-color: hsl(var(--background));
+  color: hsl(var(--text));
 }
 
 .react-flow__edge-path {
@@ -39,9 +41,10 @@ body {
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
+    --text: 0 0% 0%;
   }
   .dark {
-    --background: 0 0% 3.9%;
+    --background: 0 0% 10%;
     --foreground: 0 0% 98%;
     --card: 0 0% 3.9%;
     --card-foreground: 0 0% 98%;
@@ -65,6 +68,26 @@ body {
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+    --text: 0 0% 100%;
+  }
+  .light {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --border: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    --text: 0 0% 0%;
+  }
+  .bluelight {
+    --background: 200 30% 98%;
+    --foreground: 200 30% 10%;
+    --card: 200 30% 98%;
+    --card-foreground: 200 30% 10%;
+    --border: 200 30% 89.8%;
+    --ring: 200 30% 10%;
+    --text: 200 30% 10%;
+    filter: sepia(30%) hue-rotate(180deg) brightness(95%);
   }
 }
 
@@ -75,4 +98,45 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* 노드 스타일 */
+.react-flow__node {
+  @apply transition-colors duration-300;
+}
+
+/* 입력 노드 */
+.light .input-node,
+.bluelight .input-node {
+  @apply bg-white border-gray-200;
+}
+
+/* 단어 노드 */
+.light .word-chunk-node,
+.bluelight .word-chunk-node {
+  @apply text-gray-900 border-gray-300;
+}
+
+/* 원어 노드 */
+.light .origin-node,
+.bluelight .origin-node {
+  @apply bg-white border-gray-200;
+}
+
+/* 결합 노드 */
+.light .combined-node,
+.bluelight .combined-node {
+  @apply bg-white border-gray-200;
+}
+
+/* 배경 */
+.light .react-flow,
+.bluelight .react-flow {
+  @apply bg-gray-50;
+}
+
+/* 엣지 */
+.light .react-flow__edge path,
+.bluelight .react-flow__edge path {
+  @apply stroke-gray-400;
 }

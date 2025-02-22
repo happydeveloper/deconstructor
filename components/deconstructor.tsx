@@ -20,6 +20,7 @@ import { atom, useAtom } from "jotai";
 import Spinner from "./spinner";
 import { toast } from "sonner";
 import { usePlausible } from "next-plausible";
+import { useTheme } from "next-themes";
 
 const isLoadingAtom = atom(false);
 
@@ -35,7 +36,7 @@ const WordChunkNode = ({ data }: { data: { text: string } }) => {
   
   const speak = () => {
     const utterance = new SpeechSynthesisUtterance(data.text);
-    utterance.lang = 'ko-KR'; // 한국어 설정
+    utterance.lang = 'ko-KR';
     window.speechSynthesis.speak(utterance);
   };
 
@@ -46,13 +47,15 @@ const WordChunkNode = ({ data }: { data: { text: string } }) => {
       }`}
     >
       <div 
-        className="text-5xl font-serif mb-1 cursor-pointer hover:text-blue-400 transition-colors"
+        className="text-5xl font-serif mb-1 cursor-pointer transition-colors bg-card rounded-lg px-4 py-2"
         onClick={speak}
         title="클릭하여 발음 듣기"
       >
-        {data.text}
+        <span className="text-card-foreground hover:text-blue-600 dark:hover:text-blue-400">
+          {data.text}
+        </span>
       </div>
-      <div className="w-full h-3 border border-t-0 border-white" />
+      <div className="w-full h-3 border border-t-0 border-gray-400 dark:border-gray-600" />
       <Handle type="source" position={Position.Bottom} style={{ opacity: 0 }} />
     </div>
   );
@@ -506,6 +509,7 @@ const nodeTypes = {
 
 function Deconstructor({ word }: { word?: string }) {
   const [isLoading, setIsLoading] = useAtom(isLoadingAtom);
+  const { theme } = useTheme();
 
   const [definition, setDefinition] = useState<Definition>(defaultDefinition);
   const plausible = usePlausible();
@@ -591,17 +595,22 @@ function Deconstructor({ word }: { word?: string }) {
   console.log(nodes);
 
   return (
-    <ReactFlow
-      nodes={nodes}
-      edges={edges}
-      onNodesChange={onNodesChange}
-      onEdgesChange={onEdgesChange}
-      nodeTypes={nodeTypes}
-      className="bg-gray-900"
-      proOptions={{ hideAttribution: true }}
-    >
-      <Background color="#333" />
-    </ReactFlow>
+    <div className="h-screen bg-background text-foreground transition-colors duration-300">
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        nodeTypes={nodeTypes}
+        className="bg-background"
+        proOptions={{ hideAttribution: true }}
+      >
+        <Background 
+          color={theme === "dark" ? "#333" : theme === "light" ? "#999" : "#668"} 
+          className="transition-colors duration-300"
+        />
+      </ReactFlow>
+    </div>
   );
 }
 
