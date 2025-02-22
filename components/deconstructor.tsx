@@ -66,10 +66,20 @@ const OriginNode = ({
   const [isLoading] = useAtom(isLoadingAtom);
   
   const speak = () => {
-    const utterance = new SpeechSynthesisUtterance(data.originalWord);
+    // 원어 발음
+    const originalUtterance = new SpeechSynthesisUtterance(data.originalWord);
     // 어원 언어에 따라 언어 설정
-    utterance.lang = data.origin.toLowerCase().includes('korean') ? 'ko-KR' : 'en-US';
-    window.speechSynthesis.speak(utterance);
+    originalUtterance.lang = data.origin.toLowerCase().includes('korean') ? 'ko-KR' : 'en-US';
+    
+    // 의미 설명 발음 (한국어)
+    const meaningUtterance = new SpeechSynthesisUtterance(data.meaning);
+    meaningUtterance.lang = 'ko-KR';
+    
+    // 순차적으로 발음
+    window.speechSynthesis.speak(originalUtterance);
+    originalUtterance.onend = () => {
+      window.speechSynthesis.speak(meaningUtterance);
+    };
   };
 
   return (
@@ -88,7 +98,17 @@ const OriginNode = ({
             {data.originalWord}
           </p>
           <p className="text-xs text-gray-400 w-full">{data.origin}</p>
-          <p className="text-xs text-gray-300 w-full">{data.meaning}</p>
+          <p 
+            className="text-xs text-gray-300 w-full cursor-pointer hover:text-blue-400 transition-colors"
+            onClick={() => {
+              const meaningUtterance = new SpeechSynthesisUtterance(data.meaning);
+              meaningUtterance.lang = 'ko-KR';
+              window.speechSynthesis.speak(meaningUtterance);
+            }}
+            title="클릭하여 의미 듣기"
+          >
+            {data.meaning}
+          </p>
         </div>
       </div>
       <Handle type="target" position={Position.Top} style={{ opacity: 0 }} />
@@ -105,9 +125,20 @@ const CombinedNode = ({
   const [isLoading] = useAtom(isLoadingAtom);
   
   const speak = () => {
-    const utterance = new SpeechSynthesisUtterance(data.text);
-    utterance.lang = 'ko-KR'; // 한국어 설정
-    window.speechSynthesis.speak(utterance);
+    // 단어 발음
+    const textUtterance = new SpeechSynthesisUtterance(data.text);
+    // 영어 포함 여부에 따라 언어 설정
+    textUtterance.lang = /[a-zA-Z]/.test(data.text) ? 'en-US' : 'ko-KR';
+    
+    // 의미 설명 발음 (한국어)
+    const definitionUtterance = new SpeechSynthesisUtterance(data.definition);
+    definitionUtterance.lang = 'ko-KR';
+    
+    // 순차적으로 발음
+    window.speechSynthesis.speak(textUtterance);
+    textUtterance.onend = () => {
+      window.speechSynthesis.speak(definitionUtterance);
+    };
   };
 
   return (
@@ -125,7 +156,17 @@ const CombinedNode = ({
           >
             {data.text}
           </p>
-          <p className="text-sm text-gray-300 w-full">{data.definition}</p>
+          <p 
+            className="text-sm text-gray-300 w-full cursor-pointer hover:text-blue-400 transition-colors"
+            onClick={() => {
+              const definitionUtterance = new SpeechSynthesisUtterance(data.definition);
+              definitionUtterance.lang = 'ko-KR';
+              window.speechSynthesis.speak(definitionUtterance);
+            }}
+            title="클릭하여 의미 듣기"
+          >
+            {data.definition}
+          </p>
         </div>
       </div>
       <Handle type="target" position={Position.Top} style={{ opacity: 0 }} />
