@@ -36,7 +36,8 @@ const WordChunkNode = ({ data }: { data: { text: string } }) => {
   
   const speak = () => {
     const utterance = new SpeechSynthesisUtterance(data.text);
-    utterance.lang = 'ko-KR';
+    // 영어 포함 여부에 따라 언어 설정
+    utterance.lang = /[a-zA-Z]/.test(data.text) ? 'en-US' : 'ko-KR';
     window.speechSynthesis.speak(utterance);
   };
 
@@ -71,8 +72,8 @@ const OriginNode = ({
   const speak = () => {
     // 원어 발음
     const originalUtterance = new SpeechSynthesisUtterance(data.originalWord);
-    // 어원 언어에 따라 언어 설정
-    originalUtterance.lang = data.origin.toLowerCase().includes('korean') ? 'ko-KR' : 'en-US';
+    // 어원 언어에 따라 언어 설정 (영어/라틴어/그리스어는 영어로, 한국어는 한국어로)
+    originalUtterance.lang = /[a-zA-Z]/.test(data.originalWord) ? 'en-US' : 'ko-KR';
     
     // 의미 설명 발음 (한국어)
     const meaningUtterance = new SpeechSynthesisUtterance(data.meaning);
