@@ -128,7 +128,7 @@ const InputNode = ({
         type="text"
         value={word}
         onChange={(e) => setWord(e.target.value)}
-        placeholder="Enter a word..."
+        placeholder="단어를 입력하세요..."
         className="flex-1 px-3 py-2 rounded-lg bg-gray-900/50 border border-gray-700/50 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
         disabled={isLoading}
       />
@@ -139,7 +139,7 @@ const InputNode = ({
           isLoading ? "cursor-not-allowed" : ""
         }`}
       >
-        {isLoading ? <Spinner /> : "Analyze"}
+        {isLoading ? <Spinner /> : "분석하기"}
       </button>
       {/* <Handle type="source" position={Position.Bottom} style={{ opacity: 0 }} /> */}
     </form>
@@ -372,7 +372,10 @@ function createInitialNodes(
       source: part.id,
       target: originId,
       type: "straight",
-      style: { stroke: "#4B5563", strokeWidth: 1 },
+      style: { 
+        stroke: "#4B5563", 
+        strokeWidth: 1 
+      },
       animated: true,
     });
   });
@@ -404,7 +407,10 @@ function createInitialNodes(
           source: actualSourceId,
           target: combination.id,
           type: "straight",
-          style: { stroke: "#4B5563", strokeWidth: 1 },
+          style: { 
+            stroke: "#4B5563", 
+            strokeWidth: 1 
+          },
           animated: true,
         });
       });

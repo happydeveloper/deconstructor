@@ -10,12 +10,12 @@ const notoSerif = Noto_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "deconstructor.",
-  description: "truly understand language.",
+  title: "해체자",
+  description: "언어를 진정 이해하다.",
   openGraph: {
-    title: "deconstructor.",
-    siteName: "deconstructor.",
-    description: "truly understand language.",
+    title: "해체자",
+    siteName: "해체자",
+    description: "언어를 진정 이해하다.",
     images: "/og.png",
   },
 };
