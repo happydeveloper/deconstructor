@@ -520,9 +520,9 @@ const nodeTypes = {
 function Deconstructor({ word }: { word?: string }) {
   const [isLoading, setIsLoading] = useAtom(isLoadingAtom);
   const { theme } = useTheme();
-
   const [definition, setDefinition] = useState<Definition>(defaultDefinition);
   const plausible = usePlausible();
+
   const handleWordSubmit = async (word: string) => {
     console.log("handleWordSubmit", word);
     try {
@@ -561,14 +561,14 @@ function Deconstructor({ word }: { word?: string }) {
 
   useEffect(() => {
     async function fetchDefinition() {
-      if (word) {
-        setIsLoading(true);
-        await handleWordSubmit(word);
-        setIsLoading(false);
-      }
+      // 전달받은 word가 있으면 그것을 사용하고, 없으면 "TTMIK" 사용
+      const wordToAnalyze = word || "TTMIK";
+      setIsLoading(true);
+      await handleWordSubmit(wordToAnalyze);
+      setIsLoading(false);
     }
     fetchDefinition();
-  }, [word]);
+  }, [word]); // word prop이 변경될 때만 실행
 
   const { initialNodes, initialEdges } = useMemo(
     () => createInitialNodes(definition, handleWordSubmit, word),
