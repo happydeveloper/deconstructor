@@ -1,75 +1,75 @@
-# Word Deconstructor
+# 단어 분석기
 
-A beautiful and interactive web application that deconstructs words into their meaningful parts and explains their etymology. Built with Next.js, React Flow, and powered by AI.
+Next.js, React Flow로 구축되고 AI로 구동되는 단어를 의미 있는 부분으로 분해하고 어원을 설명하는 아름답고 인터랙티브한 웹 애플리케이션입니다.
 
-## Features
+## 주요 기능
 
-- 🔍 Interactive word analysis
-- 🌳 Beautiful visualization of word components using React Flow
-- 📚 Detailed etymology and meaning breakdowns
-- 🎨 Dark mode
-- ⚡ Real-time updates and animations
-- 🧠 AI-powered word deconstruction using OpenRouter API
+- 🔍 인터랙티브한 단어 분석
+- 🌳 React Flow를 사용한 단어 구성 요소의 아름다운 시각화
+- 📚 상세한 어원과 의미 분석
+- 🎨 다크 모드
+- ⚡ 실시간 업데이트와 애니메이션
+- 🧠 OpenRouter API를 활용한 AI 기반 단어 분해
 
-## Prerequisites
+## 사전 요구사항
 
-Before you begin, ensure you have:
+시작하기 전에 다음 사항을 확인하세요:
 
-- Node.js 18+ installed
-- An OpenRouter API key (get one at [OpenRouter](https://openrouter.ai))
+- Node.js 18+ 설치
+- OpenRouter API 키 ([OpenRouter](https://openrouter.ai)에서 발급 가능)
 
-## Getting Started
+## 시작하기
 
-1. Clone the repository:
+1. 저장소 복제:
 
 ```bash
-git clone https://github.com/hyusap/deconstructor.git
+git clone 
 cd deconstructor
 ```
 
-2. Install dependencies:
+2. 의존성 설치:
 
 ```bash
 bun install
 ```
 
-3. Set up environment variables:
+3. 환경 변수 설정:
 
 ```bash
 cp example.env .env.local
 ```
 
-Then edit `.env.local` and add your OpenRouter API key.
+그런 다음 `.env.local` 파일을 편집하여 OpenRouter API 키를 추가하세요.
 
-4. Run the development server:
+4. 개발 서버 실행:
 
 ```bash
 bun dev
 ```
 
-5. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+5. 브라우저에서 [http://localhost:3000](http://localhost:3000)을 열어 결과를 확인하세요.
 
-## How It Works
+## 작동 방식
 
-The Word Deconstructor breaks down words into their constituent parts:
+단어 분석기는 다음과 같이 단어를 구성 요소로 분해합니다:
 
-1. Enter any word in the input field
-2. The AI analyzes the word's etymology and components
-3. A beautiful graph visualization shows:
-   - Individual word parts
-   - Their origins (Latin, Greek, etc.)
-   - Meanings of each component
-   - How components combine to form the full word
+1. 입력 필드에 원하는 단어 입력
+2. AI가 단어의 어원과 구성 요소를 분석
+3. 그래프 시각화를 통해 다음 사항을 표시:
+   - 개별 단어 구성 요소
+   - 각 구성 요소의 출처 (라틴어, 그리스어 등)
+   - 각 구성 요소의 의미
+   - 구성 요소들이 전체 단어를 형성하는 방식
 
-## Tech Stack
+## 기술 스택
 
-- [Next.js](https://nextjs.org/) - React framework
-- [React Flow](https://reactflow.dev/) - Graph visualization
-- [Tailwind CSS](https://tailwindcss.com/) - Styling
-- [OpenRouter AI](https://openrouter.ai/) - AI-powered word analysis
-- [TypeScript](https://www.typescriptlang.org/) - Type safety
-- [Jotai](https://jotai.org/) - State management
+- [Next.js](https://nextjs.org/) - React 프레임워크
+- [React Flow](https://reactflow.dev/) - 그래프 시각화
+- [Tailwind CSS](https://tailwindcss.com/) - 스타일링
+- [OpenRouter AI](https://openrouter.ai/) - AI 기반 단어 분석
+- [TypeScript](https://www.typescriptlang.org/) - 타입 안정성
+- [Jotai](https://jotai.org/) - 상태 관리
 
-## Contributing
+## 기여하기
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+기여는 언제나 환영합니다! 자유롭게 Pull Request를 제출해 주세요.
