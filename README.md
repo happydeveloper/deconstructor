@@ -17,6 +17,7 @@ Next.js, React Flow로 구축되고 AI로 구동되는 단어를 의미 있는 �
 
 - Node.js 18+ 설치
 - OpenRouter API 키 ([OpenRouter](https://openrouter.ai)에서 발급 가능)
+- Google Generative AI API 키 ([Google AI Studio](https://aistudio.google.com/app/apikey)에서 발급 가능)
 
 ## 시작하기
 
@@ -39,7 +40,9 @@ bun install
 cp example.env .env.local
 ```
 
-그런 다음 `.env.local` 파일을 편집하여 OpenRouter API 키를 추가하세요.
+그런 다음 `.env.local` 파일을 편집하여 다음 API 키들을 추가하세요:
+- OPENROUTER_API_KEY: OpenRouter API 키
+- GOOGLE_GENERATIVE_AI_API_KEY: Google AI Studio API 키
 
 4. 개발 서버 실행:
 
@@ -73,3 +76,9 @@ bun dev
 ## 기여하기
 
 기여는 언제나 환영합니다! 자유롭게 Pull Request를 제출해 주세요.
+
+## 현지화
+- 한국어 지원
+- 영어 지원
+
+## 라이선스
