@@ -43,24 +43,16 @@ const WordChunkNode = ({ data }: { data: { text: string } }) => {
     window.speechSynthesis.speak(utterance);
   };
 
-  const openNaverDict = () => {
-    window.open(`https://dict.naver.com/dict.search?dicQuery=${encodeURIComponent(data.text)}`, '_blank');
-  };
-
   return (
     <div className={`flex flex-col items-center transition-all duration-1000 ${
       isLoading ? "opacity-0 blur-[20px]" : ""
     }`}>
       <div 
-        className="text-5xl font-serif mb-1 cursor-pointer transition-colors bg-card rounded-lg px-4 py-2 group"
-        title="클릭하여 발음 듣기 / 우클릭하여 네이버 사전 열기"
+        className="text-5xl font-serif mb-1 cursor-pointer transition-colors bg-card rounded-lg px-4 py-2"
+        title="클릭하여 발음 듣기"
         onClick={speak}
-        onContextMenu={(e) => {
-          e.preventDefault();
-          openNaverDict();
-        }}
       >
-        <span className="text-card-foreground hover:text-blue-600 dark:hover:text-blue-400 group-hover:after:content-['🔍'] group-hover:after:ml-2 group-hover:after:text-sm">
+        <span className="text-card-foreground hover:text-blue-600 dark:hover:text-blue-400">
           {data.text}
         </span>
       </div>
@@ -163,7 +155,7 @@ const CombinedNode = ({
             onClick={speak}
             title="클릭하여 발음 듣기"
           >
-            <span className="group-hover:after:content-['🌐'] group-hover:after:ml-2 group-hover:after:text-sm">
+            <span className="group-hover:after:ml-2 group-hover:after:text-sm">
               {data.text}
             </span>
           </p>
@@ -177,7 +169,7 @@ const CombinedNode = ({
             }}
             title="클릭하여 의미 듣기"
           >
-            <span className="group-hover:after:content-['🌐'] group-hover:after:ml-2 group-hover:after:text-sm">
+            <span className="group-hover:after:ml-2 group-hover:after:text-sm">
               {data.definition}
             </span>
           </p>
