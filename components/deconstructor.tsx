@@ -21,6 +21,7 @@ import Spinner from "./spinner";
 import { toast } from "sonner";
 import { usePlausible } from "next-plausible";
 import { useTheme } from "next-themes";
+import { ttsEnabledAtom } from "./tts-toggle";
 
 const isLoadingAtom = atom(false);
 
@@ -33,26 +34,33 @@ type Combination = {
 
 const WordChunkNode = ({ data }: { data: { text: string } }) => {
   const [isLoading] = useAtom(isLoadingAtom);
+  const [ttsEnabled] = useAtom(ttsEnabledAtom);
   
   const speak = () => {
+    if (!ttsEnabled) return;
     const utterance = new SpeechSynthesisUtterance(data.text);
-    // 영어 포함 여부에 따라 언어 설정
     utterance.lang = /[a-zA-Z]/.test(data.text) ? 'en-US' : 'ko-KR';
     window.speechSynthesis.speak(utterance);
   };
 
+  const openNaverDict = () => {
+    window.open(`https://dict.naver.com/dict.search?dicQuery=${encodeURIComponent(data.text)}`, '_blank');
+  };
+
   return (
-    <div
-      className={`flex flex-col items-center transition-all duration-1000 ${
-        isLoading ? "opacity-0 blur-[20px]" : ""
-      }`}
-    >
+    <div className={`flex flex-col items-center transition-all duration-1000 ${
+      isLoading ? "opacity-0 blur-[20px]" : ""
+    }`}>
       <div 
-        className="text-5xl font-serif mb-1 cursor-pointer transition-colors bg-card rounded-lg px-4 py-2"
+        className="text-5xl font-serif mb-1 cursor-pointer transition-colors bg-card rounded-lg px-4 py-2 group"
+        title="클릭하여 발음 듣기 / 우클릭하여 네이버 사전 열기"
         onClick={speak}
-        title="클릭하여 발음 듣기"
+        onContextMenu={(e) => {
+          e.preventDefault();
+          openNaverDict();
+        }}
       >
-        <span className="text-card-foreground hover:text-blue-600 dark:hover:text-blue-400">
+        <span className="text-card-foreground hover:text-blue-600 dark:hover:text-blue-400 group-hover:after:content-['🔍'] group-hover:after:ml-2 group-hover:after:text-sm">
           {data.text}
         </span>
       </div>
@@ -68,18 +76,16 @@ const OriginNode = ({
   data: { originalWord: string; origin: string; meaning: string };
 }) => {
   const [isLoading] = useAtom(isLoadingAtom);
+  const [ttsEnabled] = useAtom(ttsEnabledAtom);
   
   const speak = () => {
-    // 원어 발음
+    if (!ttsEnabled) return;
     const originalUtterance = new SpeechSynthesisUtterance(data.originalWord);
-    // 어원 언어에 따라 언어 설정 (영어/라틴어/그리스어는 영어로, 한국어는 한국어로)
     originalUtterance.lang = /[a-zA-Z]/.test(data.originalWord) ? 'en-US' : 'ko-KR';
     
-    // 의미 설명 발음 (한국어)
     const meaningUtterance = new SpeechSynthesisUtterance(data.meaning);
     meaningUtterance.lang = 'ko-KR';
     
-    // 순차적으로 발음
     window.speechSynthesis.speak(originalUtterance);
     originalUtterance.onend = () => {
       window.speechSynthesis.speak(meaningUtterance);
@@ -87,11 +93,9 @@ const OriginNode = ({
   };
 
   return (
-    <div
-      className={`flex flex-col items-stretch transition-all duration-1000 ${
-        isLoading ? "opacity-0 blur-[20px]" : ""
-      }`}
-    >
+    <div className={`flex flex-col items-stretch transition-all duration-1000 ${
+      isLoading ? "opacity-0 blur-[20px]" : ""
+    }`}>
       <div className="px-4 py-2 rounded-lg bg-card border border-border min-w-fit max-w-[180px]">
         <div className="flex flex-col items-start">
           <p 
@@ -105,6 +109,7 @@ const OriginNode = ({
           <p 
             className="text-xs text-card-foreground w-full cursor-pointer hover:text-blue-600 dark:hover:text-blue-400"
             onClick={() => {
+              if (!ttsEnabled) return;
               const meaningUtterance = new SpeechSynthesisUtterance(data.meaning);
               meaningUtterance.lang = 'ko-KR';
               window.speechSynthesis.speak(meaningUtterance);
@@ -127,49 +132,54 @@ const CombinedNode = ({
   data: { text: string; definition: string };
 }) => {
   const [isLoading] = useAtom(isLoadingAtom);
+  const [ttsEnabled] = useAtom(ttsEnabledAtom);
   
   const speak = () => {
-    // 단어 발음
+    if (!ttsEnabled) return;
     const textUtterance = new SpeechSynthesisUtterance(data.text);
-    // 영어 포함 여부에 따라 언어 설정
     textUtterance.lang = /[a-zA-Z]/.test(data.text) ? 'en-US' : 'ko-KR';
     
-    // 의미 설명 발음 (한국어)
     const definitionUtterance = new SpeechSynthesisUtterance(data.definition);
     definitionUtterance.lang = 'ko-KR';
     
-    // 순차적으로 발음
     window.speechSynthesis.speak(textUtterance);
     textUtterance.onend = () => {
       window.speechSynthesis.speak(definitionUtterance);
     };
   };
 
+  const openPapago = (text: string) => {
+    window.open(`https://papago.naver.com/?sk=ko&tk=en&st=${encodeURIComponent(text)}`, '_blank');
+  };
+
   return (
-    <div
-      className={`flex flex-col items-stretch transition-all duration-1000 ${
-        isLoading ? "opacity-0 blur-[20px]" : ""
-      }`}
-    >
+    <div className={`flex flex-col items-stretch transition-all duration-1000 ${
+      isLoading ? "opacity-0 blur-[20px]" : ""
+    }`}>
       <div className="px-4 py-2 rounded-lg bg-card border border-border min-w-fit max-w-[250px]">
         <div className="flex flex-col items-start">
           <p 
-            className="text-xl font-serif mb-1 whitespace-nowrap cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 text-card-foreground"
+            className="text-xl font-serif mb-1 whitespace-nowrap cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 text-card-foreground group"
             onClick={speak}
             title="클릭하여 발음 듣기"
           >
-            {data.text}
+            <span className="group-hover:after:content-['🌐'] group-hover:after:ml-2 group-hover:after:text-sm">
+              {data.text}
+            </span>
           </p>
           <p 
             className="text-sm text-card-foreground w-full cursor-pointer hover:text-blue-600 dark:hover:text-blue-400"
             onClick={() => {
+              if (!ttsEnabled) return;
               const definitionUtterance = new SpeechSynthesisUtterance(data.definition);
               definitionUtterance.lang = 'ko-KR';
               window.speechSynthesis.speak(definitionUtterance);
             }}
             title="클릭하여 의미 듣기"
           >
-            {data.definition}
+            <span className="group-hover:after:content-['🌐'] group-hover:after:ml-2 group-hover:after:text-sm">
+              {data.definition}
+            </span>
           </p>
         </div>
       </div>

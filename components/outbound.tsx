@@ -2,6 +2,7 @@
 
 import { HouseIcon, GithubIcon, TwitterIcon } from "lucide-react";
 import ThemeToggle from "./theme-toggle";
+import TTSToggle from "./tts-toggle";
 
 function OutboundButton({
   href,
@@ -28,6 +29,7 @@ export default function Outbound() {
       <div className="flex gap-1">
         <OutboundButton href="https://ayush.digital" Icon={HouseIcon} />
         <ThemeToggle />
+        <TTSToggle />
         <OutboundButton
           href="https://github.com/hyusap/deconstructor"
           Icon={GithubIcon}
