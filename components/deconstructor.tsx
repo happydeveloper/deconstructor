@@ -91,18 +91,18 @@ const OriginNode = ({
         isLoading ? "opacity-0 blur-[20px]" : ""
       }`}
     >
-      <div className="px-4 py-2 rounded-lg bg-gray-800 border border-gray-700/50 min-w-fit max-w-[180px]">
+      <div className="px-4 py-2 rounded-lg bg-card border border-border min-w-fit max-w-[180px]">
         <div className="flex flex-col items-start">
           <p 
-            className="text-lg font-serif mb-1 whitespace-nowrap cursor-pointer hover:text-blue-400 transition-colors"
+            className="text-lg font-serif mb-1 whitespace-nowrap cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 text-card-foreground"
             onClick={speak}
             title="클릭하여 발음 듣기"
           >
             {data.originalWord}
           </p>
-          <p className="text-xs text-gray-400 w-full">{data.origin}</p>
+          <p className="text-xs text-muted-foreground w-full">{data.origin}</p>
           <p 
-            className="text-xs text-gray-300 w-full cursor-pointer hover:text-blue-400 transition-colors"
+            className="text-xs text-card-foreground w-full cursor-pointer hover:text-blue-600 dark:hover:text-blue-400"
             onClick={() => {
               const meaningUtterance = new SpeechSynthesisUtterance(data.meaning);
               meaningUtterance.lang = 'ko-KR';
@@ -150,17 +150,17 @@ const CombinedNode = ({
         isLoading ? "opacity-0 blur-[20px]" : ""
       }`}
     >
-      <div className="px-4 py-2 rounded-lg bg-gray-800 border border-gray-700/50 min-w-fit max-w-[250px]">
+      <div className="px-4 py-2 rounded-lg bg-card border border-border min-w-fit max-w-[250px]">
         <div className="flex flex-col items-start">
           <p 
-            className="text-xl font-serif mb-1 whitespace-nowrap cursor-pointer hover:text-blue-400 transition-colors"
+            className="text-xl font-serif mb-1 whitespace-nowrap cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 text-card-foreground"
             onClick={speak}
             title="클릭하여 발음 듣기"
           >
             {data.text}
           </p>
           <p 
-            className="text-sm text-gray-300 w-full cursor-pointer hover:text-blue-400 transition-colors"
+            className="text-sm text-card-foreground w-full cursor-pointer hover:text-blue-600 dark:hover:text-blue-400"
             onClick={() => {
               const definitionUtterance = new SpeechSynthesisUtterance(data.definition);
               definitionUtterance.lang = 'ko-KR';
@@ -201,7 +201,7 @@ const InputNode = ({
 
   return (
     <form
-      className="px-6 py-4 rounded-xl bg-gray-800/80 border border-gray-700/50 shadow-xl flex gap-3"
+      className="px-6 py-4 rounded-xl bg-card border border-border shadow-xl flex gap-3"
       onSubmit={handleSubmit}
     >
       <input
@@ -209,7 +209,7 @@ const InputNode = ({
         value={word}
         onChange={(e) => setWord(e.target.value)}
         placeholder="단어를 입력하세요..."
-        className="flex-1 px-3 py-2 rounded-lg bg-gray-900/50 border border-gray-700/50 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+        className="flex-1 px-3 py-2 rounded-lg bg-background border border-border text-card-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/50"
         disabled={isLoading}
       />
       <button
@@ -221,7 +221,6 @@ const InputNode = ({
       >
         {isLoading ? <Spinner /> : "분석하기"}
       </button>
-      {/* <Handle type="source" position={Position.Bottom} style={{ opacity: 0 }} /> */}
     </form>
   );
 };
