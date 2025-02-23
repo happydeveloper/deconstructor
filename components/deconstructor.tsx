@@ -572,7 +572,7 @@ function Deconstructor({ word }: { word?: string }) {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
-        className="bg-background"
+        className="bg-background h-[calc(100vh-6rem)]"
         proOptions={{ hideAttribution: true }}
       >
         <Background 
