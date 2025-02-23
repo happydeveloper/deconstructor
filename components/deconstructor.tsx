@@ -464,7 +464,7 @@ function Deconstructor({ word }: { word?: string }) {
         return;
       }
 
-      // API 호출
+      // API 경로 수정
       const response = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
