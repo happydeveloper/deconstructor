@@ -25,15 +25,10 @@ import { ttsEnabledAtom } from "./tts-toggle";
 import { addToHistory, getCachedDefinition, cacheDefinition } from "@/utils/storage";
 import { SearchHistory } from "./search-history";
 import { ExternalLink } from "lucide-react";
+import { defaultDefinition } from '@/types/definition';
+import type { Definition } from '@/types/definition';
 
 const isLoadingAtom = atom(false);
-
-type Combination = {
-  id: string;
-  text: string;
-  definition: string;
-  sourceIds: string[];
-};
 
 const WordChunkNode = ({ data }: { data: { text: string } }) => {
   const [isLoading] = useAtom(isLoadingAtom);
@@ -126,7 +121,6 @@ const CombinedNode = ({
 }: {
   data: { text: string; definition: string };
 }) => {
-  const [isLoading] = useAtom(isLoadingAtom);
   const [ttsEnabled] = useAtom(ttsEnabledAtom);
   
   const speak = () => {
@@ -143,14 +137,8 @@ const CombinedNode = ({
     };
   };
 
-  const openPapago = (text: string) => {
-    window.open(`https://papago.naver.com/?sk=ko&tk=en&st=${encodeURIComponent(text)}`, '_blank');
-  };
-
   return (
-    <div className={`flex flex-col items-stretch transition-all duration-1000 ${
-      isLoading ? "opacity-0 blur-[20px]" : ""
-    }`}>
+    <div className={`flex flex-col items-stretch transition-all duration-1000`}>
       <div className="px-4 py-2 rounded-lg bg-card border border-border min-w-fit max-w-[250px]">
         <div className="flex flex-col items-start">
           <p 
@@ -349,70 +337,6 @@ function getLayoutedElements(nodes: Node[], edges: Edge[]) {
   return { nodes: newNodes, edges };
 }
 
-// interface Definition {
-//   parts: {
-//     id: string;
-//     text: string;
-//     originalWord: string;
-//     origin: string;
-//     meaning: string;
-//   }[];
-//   combinations: {
-//     id: string;
-//     text: string;
-//     definition: string;
-//     sourceIds: string[];
-//   }[];
-// }
-
-type Definition = z.infer<typeof wordSchema>;
-
-const defaultDefinition: Definition = {
-  thought: "",
-  parts: [
-    {
-      id: "de",
-      text: "de",
-      originalWord: "de-",
-      origin: "Latin",
-      meaning: "down, off, away",
-    },
-    {
-      id: "construc",
-      text: "construc",
-      originalWord: "construere",
-      origin: "Latin",
-      meaning: "to build, to pile up",
-    },
-    {
-      id: "tor",
-      text: "tor",
-      originalWord: "-or",
-      origin: "Latin",
-      meaning: "agent noun, one who does an action",
-    },
-  ],
-  combinations: [
-    [
-      {
-        id: "constructor",
-        text: "constructor",
-        definition: "one who constructs or builds",
-        sourceIds: ["construc", "tor"],
-      },
-    ],
-    [
-      {
-        id: "deconstructor",
-        text: "deconstructor",
-        definition:
-          "one who takes apart or analyzes the construction of something",
-        sourceIds: ["de", "constructor"],
-      },
-    ],
-  ],
-};
-
 function createInitialNodes(
   definition: Definition,
   handleWordSubmit: (word: string) => void,
@@ -516,7 +440,6 @@ function Deconstructor({ word }: { word?: string }) {
   const [isLoading, setIsLoading] = useAtom(isLoadingAtom);
   const { theme } = useTheme();
   const [definition, setDefinition] = useState<Definition>(() => {
-    // 초기값을 즉시 설정
     const cached = getCachedDefinition("우리가 사랑한 한국어");
     return cached || defaultDefinition;
   });
@@ -528,7 +451,8 @@ function Deconstructor({ word }: { word?: string }) {
 
   const handleWordSubmit = async (word: string) => {
     console.log("handleWordSubmit", word);
-    setCurrentWord(word); // 현재 단어 업데이트
+    setCurrentWord(word);
+    setIsLoading(true);
     
     try {
       // 캐시 확인
@@ -536,34 +460,39 @@ function Deconstructor({ word }: { word?: string }) {
       if (cached) {
         setDefinition(cached);
         addToHistory(word);
+        setIsLoading(false);
         return;
       }
 
-      const data = await fetch("/api", {
+      // API 호출
+      const response = await fetch("/api/analyze", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ word }),
       });
-      
-      if (!data.ok) {
-        throw new Error(await data.text());
+
+      if (!response.ok) {
+        throw new Error("API request failed");
       }
+
+      const data = await response.json();
+      const parsed = wordSchema.parse(data);
       
-      if (data.status === 203) {
-        toast.info("AI가 완벽하지 않지만, 분석을 시도해보았습니다.");
-      }
-      
-      const newDefinition = (await data.json()) as Definition;
-      console.log("newDefinition", newDefinition);
-      
-      // 결과 캐시 및 히스토리 저장
-      cacheDefinition(word, newDefinition);
+      setDefinition(parsed);
+      cacheDefinition(word, parsed);
       addToHistory(word);
       
-      setDefinition(newDefinition);
-      plausible("deconstruct", { props: { word } });
-    } catch (error) {
-      plausible("deconstruct_error", { props: { word } });
-      toast.error("AI가 이 단어를 분석하기 어려워합니다. 다른 단어를 시도해보세요.");
+      // Analytics
+      plausible('analyze', {
+        props: {
+          word,
+        },
+      });
+    } catch (err) {
+      toast.error("Failed to analyze word");
+      console.error("Failed to analyze word:", err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -617,7 +546,9 @@ function Deconstructor({ word }: { word?: string }) {
   console.log(nodes);
 
   return (
-    <div className="h-screen bg-background text-foreground transition-colors duration-300">
+    <div className={`h-screen bg-background text-foreground transition-colors duration-300 ${
+      isLoading ? "opacity-50" : ""
+    }`}>
       <div className="absolute top-5 left-5 z-50">
         <a
           href={BOOK_URL}

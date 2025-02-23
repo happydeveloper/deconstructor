@@ -17,4 +17,15 @@ export interface Definition {
   thought: string;
   parts: Part[];
   combinations: Combination[][];
-} 
+}
+
+export const defaultDefinition: Definition = {
+  thought: "",
+  parts: [],
+  combinations: [[{
+    id: "default",
+    text: "",
+    definition: "",
+    sourceIds: []
+  }]]
+}; 

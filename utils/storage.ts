@@ -90,7 +90,7 @@ export function getCachedDefinition(word: string): Definition | null {
 
 export function cacheDefinition(word: string, definition: Definition) {
   try {
-    const cache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
+    const cache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}') as Record<string, CacheData>;
     
     // 캐시 크기 제한 (예: 최대 50개 항목)
     const MAX_CACHE_ITEMS = 50;
