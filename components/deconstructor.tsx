@@ -24,7 +24,7 @@ import { useTheme } from "next-themes";
 import { ttsEnabledAtom } from "./tts-toggle";
 import { addToHistory, getCachedDefinition, cacheDefinition } from "@/utils/storage";
 import { SearchHistory } from "./search-history";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, History, ChevronUp, ChevronDown, Book } from "lucide-react";
 import { defaultDefinition } from '@/types/definition';
 import type { Definition } from '@/types/definition';
 
@@ -445,6 +445,7 @@ function Deconstructor({ word }: { word?: string }) {
   });
   const [currentWord, setCurrentWord] = useState<string>('우리가 사랑한 한국어');
   const plausible = usePlausible();
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   const DEFAULT_WORD = "우리가 사랑한 한국어";
   const BOOK_URL = "https://talktomeinkorean.com/product/2023-hanguel-day/";
@@ -549,22 +550,46 @@ function Deconstructor({ word }: { word?: string }) {
     <div className={`h-screen bg-background text-foreground transition-colors duration-300 ${
       isLoading ? "opacity-50" : ""
     }`}>
-      <div className="absolute top-5 left-5 z-50">
-        <a
-          href={BOOK_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+      <div className="fixed top-5 left-0 z-50 flex flex-col gap-2">
+        <div 
+          className="transition-all duration-300 transform -translate-x-[calc(100%-32px)] hover:translate-x-0 group"
         >
-          <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-            우리가 사랑한 한국어 단어, 109
-          </span>
-          <ExternalLink size={16} className="text-gray-500" />
-        </a>
+          <a
+            href={BOOK_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-between pl-4 pr-2 py-2 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-r-lg shadow-lg border border-l-0 border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors min-w-[32px]"
+          >
+            <span className="text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              우리가 사랑한 한국어 단어들
+            </span>
+            <Book size={16} className="text-blue-500 dark:text-blue-400 shrink-0 min-w-[16px]" />
+          </a>
+        </div>
+
+        <div 
+          className="transition-all duration-300 transform -translate-x-[calc(100%-32px)] hover:translate-x-0 group"
+        >
+          <button
+            onClick={() => setHistoryOpen(!historyOpen)}
+            className="flex items-center justify-between pl-4 pr-2 py-2 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-r-lg shadow-lg border border-l-0 border-gray-200 dark:border-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors w-full min-w-[32px]"
+          >
+            <span className="whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              Recent Sentences
+            </span>
+            <div className="flex items-center gap-1">
+              {historyOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+              <History size={16} className="text-blue-500 dark:text-blue-400 shrink-0 min-w-[16px]" />
+            </div>
+          </button>
+        </div>
       </div>
+
       <SearchHistory 
         onSelect={handleWordSubmit} 
-        currentWord={currentWord} 
+        currentWord={currentWord}
+        isOpen={historyOpen}
+        onOpenChange={setHistoryOpen}
       />
       <ReactFlow
         nodes={nodes}
