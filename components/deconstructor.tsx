@@ -24,6 +24,7 @@ import { useTheme } from "next-themes";
 import { ttsEnabledAtom } from "./tts-toggle";
 import { addToHistory, getCachedDefinition, cacheDefinition } from "@/utils/storage";
 import { SearchHistory } from "./search-history";
+import { ExternalLink } from "lucide-react";
 
 const isLoadingAtom = atom(false);
 
@@ -514,9 +515,16 @@ const nodeTypes = {
 function Deconstructor({ word }: { word?: string }) {
   const [isLoading, setIsLoading] = useAtom(isLoadingAtom);
   const { theme } = useTheme();
-  const [definition, setDefinition] = useState<Definition>(defaultDefinition);
-  const [currentWord, setCurrentWord] = useState<string>('');
+  const [definition, setDefinition] = useState<Definition>(() => {
+    // 초기값을 즉시 설정
+    const cached = getCachedDefinition("우리가 사랑한 한국어");
+    return cached || defaultDefinition;
+  });
+  const [currentWord, setCurrentWord] = useState<string>('우리가 사랑한 한국어');
   const plausible = usePlausible();
+
+  const DEFAULT_WORD = "우리가 사랑한 한국어";
+  const BOOK_URL = "https://talktomeinkorean.com/product/2023-hanguel-day/";
 
   const handleWordSubmit = async (word: string) => {
     console.log("handleWordSubmit", word);
@@ -560,15 +568,19 @@ function Deconstructor({ word }: { word?: string }) {
   };
 
   useEffect(() => {
+    if (!word && currentWord === DEFAULT_WORD) {
+      // 이미 기본 단어가 로드되어 있으면 스킵
+      return;
+    }
+    
     async function fetchDefinition() {
-      // 전달받은 word가 있으면 그것을 사용하고, 없으면 "TTMIK" 사용
-      const wordToAnalyze = word || "TTMIK";
+      const wordToAnalyze = word || DEFAULT_WORD;
       setIsLoading(true);
       await handleWordSubmit(wordToAnalyze);
       setIsLoading(false);
     }
     fetchDefinition();
-  }, [word]); // word prop이 변경될 때만 실행
+  }, [word]);
 
   const { initialNodes, initialEdges } = useMemo(
     () => createInitialNodes(definition, handleWordSubmit, word),
@@ -606,6 +618,19 @@ function Deconstructor({ word }: { word?: string }) {
 
   return (
     <div className="h-screen bg-background text-foreground transition-colors duration-300">
+      <div className="absolute top-5 left-5 z-50">
+        <a
+          href={BOOK_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+        >
+          <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+            우리가 사랑한 한국어 단어, 109
+          </span>
+          <ExternalLink size={16} className="text-gray-500" />
+        </a>
+      </div>
       <SearchHistory 
         onSelect={handleWordSubmit} 
         currentWord={currentWord} 
