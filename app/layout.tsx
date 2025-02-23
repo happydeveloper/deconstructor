@@ -37,13 +37,13 @@ export default function RootLayout({
   return (
     <html lang="ko" suppressHydrationWarning>
       <head>
-        <PlausibleProvider
+        {/* <PlausibleProvider
           domain="deconstructor.ayush.digital"
           customDomain="https://a.ayush.digital"
           trackOutboundLinks
           selfHosted
           taggedEvents
-        />
+        /> */}
       </head>
       <body className={`${notoSerif.className} antialiased bluelight`}>
         <Outbound />

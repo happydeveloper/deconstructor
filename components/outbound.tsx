@@ -27,14 +27,14 @@ export default function Outbound() {
   return (
     <div className="absolute top-5 right-5 z-50">
       <div className="flex gap-1">
-        <OutboundButton href="https://ayush.digital" Icon={HouseIcon} />
+        {/* <OutboundButton href="https://ayush.digital" Icon={HouseIcon} /> */}
         <ThemeToggle />
         <TTSToggle />
         <OutboundButton
-          href="https://github.com/hyusap/deconstructor"
+          href="https://github.com/happydeveloper/deconstructor/tree/ko-style"
           Icon={GithubIcon}
         />
-        <OutboundButton href="https://x.com/hyusapx" Icon={TwitterIcon} />
+        {/* <OutboundButton href="https://x.com/hyusapx" Icon={TwitterIcon} /> */}
       </div>
     </div>
   );
