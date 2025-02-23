@@ -22,6 +22,8 @@ import { toast } from "sonner";
 import { usePlausible } from "next-plausible";
 import { useTheme } from "next-themes";
 import { ttsEnabledAtom } from "./tts-toggle";
+import { addToHistory, getCachedDefinition, cacheDefinition } from "@/utils/storage";
+import { SearchHistory } from "./search-history";
 
 const isLoadingAtom = atom(false);
 
@@ -513,41 +515,47 @@ function Deconstructor({ word }: { word?: string }) {
   const [isLoading, setIsLoading] = useAtom(isLoadingAtom);
   const { theme } = useTheme();
   const [definition, setDefinition] = useState<Definition>(defaultDefinition);
+  const [currentWord, setCurrentWord] = useState<string>('');
   const plausible = usePlausible();
 
   const handleWordSubmit = async (word: string) => {
     console.log("handleWordSubmit", word);
+    setCurrentWord(word); // 현재 단어 업데이트
+    
     try {
+      // 캐시 확인
+      const cached = getCachedDefinition(word);
+      if (cached) {
+        setDefinition(cached);
+        addToHistory(word);
+        return;
+      }
+
       const data = await fetch("/api", {
         method: "POST",
         body: JSON.stringify({ word }),
       });
+      
       if (!data.ok) {
         throw new Error(await data.text());
       }
+      
       if (data.status === 203) {
-        toast.info(
-          "The AI had some issues, but here's what it came up with anyway."
-        );
+        toast.info("AI가 완벽하지 않지만, 분석을 시도해보았습니다.");
       }
+      
       const newDefinition = (await data.json()) as Definition;
       console.log("newDefinition", newDefinition);
-      console.log(JSON.stringify(newDefinition, null, 2));
-      plausible("deconstruct", {
-        props: {
-          word,
-        },
-      });
-
+      
+      // 결과 캐시 및 히스토리 저장
+      cacheDefinition(word, newDefinition);
+      addToHistory(word);
+      
       setDefinition(newDefinition);
-    } catch {
-      plausible("deconstruct_error", {
-        props: {
-          word,
-        },
-      });
-      // console.error("Error fetching definition", error);
-      toast.error("The AI doesn't like that one! Try a different word.");
+      plausible("deconstruct", { props: { word } });
+    } catch (error) {
+      plausible("deconstruct_error", { props: { word } });
+      toast.error("AI가 이 단어를 분석하기 어려워합니다. 다른 단어를 시도해보세요.");
     }
   };
 
@@ -598,6 +606,10 @@ function Deconstructor({ word }: { word?: string }) {
 
   return (
     <div className="h-screen bg-background text-foreground transition-colors duration-300">
+      <SearchHistory 
+        onSelect={handleWordSubmit} 
+        currentWord={currentWord} 
+      />
       <ReactFlow
         nodes={nodes}
         edges={edges}
