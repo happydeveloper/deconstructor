@@ -39,63 +39,47 @@ export default function Outbound() {
         </div>
       </div>
       
-      <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-3 px-4 z-50 shadow-lg">
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="text-sm text-gray-700 dark:text-gray-300 flex items-center justify-center gap-2 flex-wrap">
-            <span>
-              Inspired by
-              <a 
-                href="https://github.com/hyusap/deconstructor"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 dark:text-blue-400 hover:underline mx-1 font-medium"
-              >
-                Deconstructor
-              </a>
-              by
-              <a 
-                href="https://ayush.digital"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 dark:text-blue-400 hover:underline mx-1 font-medium"
-              >
-                Ayush Gupta
-              </a>
-            </span>
-            <span className="text-gray-300 dark:text-gray-700">|</span>
-            <span>
-              Extended with Korean learning content from
-              <a 
-                href="https://talktomeinkorean.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 dark:text-blue-400 hover:underline mx-1 font-medium"
-              >
-                Talk To Me In Korean (TTMIK)
-              </a>
-            </span>
-            <span className="text-gray-300 dark:text-gray-700">|</span>
-            <span>
-              New features:
-              <span className="font-medium text-emerald-600 dark:text-emerald-400 mx-1">
-                Dark Theme
-              </span>
-              •
-              <span className="font-medium text-emerald-600 dark:text-emerald-400 mx-1">
-                Text-to-Speech
-              </span>
-              •
-              <span className="font-medium text-emerald-600 dark:text-emerald-400 mx-1">
-                Search History
-              </span>
-              •
-              <span className="font-medium text-emerald-600 dark:text-emerald-400 mx-1">
-                Local Caching
-              </span>
-            </span>
-          </p>
-        </div>
-      </div>
+      <div className="fixed bottom-0 left-0 right-0 bg-white/30 dark:bg-gray-900/30 backdrop-blur-sm border-t border-gray-200 dark:border-gray-800 py-3 px-4 z-50 shadow-lg overflow-hidden">
+  <div className="max-w-4xl mx-auto relative text-center h-8 overflow-hidden">
+    <div className="rolling-text">
+      <p className="text-xs text-gray-700 dark:text-gray-300">
+        Inspired by
+        <a 
+          href="https://github.com/hyusap/deconstructor"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 dark:text-blue-400 hover:underline mx-1 font-medium"
+        >
+          Deconstructor
+        </a>
+        by
+        <a 
+          href="https://ayush.digital"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 dark:text-blue-400 hover:underline mx-1 font-medium"
+        >
+          Ayush Gupta
+        </a>
+      </p>
+
+      <p className="text-xs text-gray-700 dark:text-gray-300">
+        Extended with Korean learning content from
+        <a 
+          href="https://talktomeinkorean.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 dark:text-blue-400 hover:underline mx-1 font-medium"
+        >
+          Talk To Me In Korean (TTMIK)
+        </a>
+      </p>
+
+    </div>
+  </div>
+</div>
+
+
     </>
   );
 }
