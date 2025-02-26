@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 import Outbound from "@/components/outbound";
 import { Providers } from "@/components/providers";
+import { Analytics } from '@vercel/analytics/react';
 
 const notoSerif = Noto_Serif({
   subsets: ["latin"],
@@ -50,6 +51,7 @@ export default function RootLayout({
           {children}
         </Providers>
         <Toaster />
+        <Analytics />
       </body>
     </html>
   );
