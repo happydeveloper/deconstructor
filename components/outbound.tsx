@@ -43,24 +43,6 @@ function OutboundButton({
 export default function Outbound() {
   return (
     <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
-      <OutboundButton
-        href="/"
-        icon={HouseIcon}
-        label="홈으로"
-        sound="홈으로 이동합니다"
-      />
-      <OutboundButton
-        href="https://github.com/your-repo"
-        icon={GithubIcon}
-        label="GitHub"
-        sound="깃허브로 이동합니다"
-      />
-      <OutboundButton
-        href="https://twitter.com/your-account"
-        icon={TwitterIcon}
-        label="Twitter"
-        sound="트위터로 이동합니다"
-      />
       <ThemeToggle />
       <TTSToggle />
     </div>
