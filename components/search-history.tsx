@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { getHistory, type SearchHistory } from '@/utils/storage';
-import { History, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { History, ChevronDown, ChevronUp, X, ExternalLink } from 'lucide-react';
 
 interface SearchHistoryProps {
   onSelect: (word: string) => void;
@@ -10,6 +10,11 @@ interface SearchHistoryProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
 }
+
+// Papago URL 생성 함수
+const getPapagoUrl = (text: string) => {
+  return `https://papago.naver.com/?sk=ko&tk=ko&hn=0&st=${encodeURIComponent(text)}`;
+};
 
 export function SearchHistory({ onSelect, currentWord, isOpen, onOpenChange }: SearchHistoryProps) {
   const [history, setHistory] = useState<SearchHistory[]>([]);
@@ -35,7 +40,7 @@ export function SearchHistory({ onSelect, currentWord, isOpen, onOpenChange }: S
       window.removeEventListener('resize', handleResize);
       document.removeEventListener('wordAnalyzed', handleWordAnalyzed);
     };
-  }, []);
+  }, [onOpenChange]);
 
   if (history.length === 0) return null;
 
@@ -74,24 +79,34 @@ export function SearchHistory({ onSelect, currentWord, isOpen, onOpenChange }: S
         <div className="h-full overflow-y-auto p-2">
           <div className="flex flex-col gap-2">
             {history.slice(0, 10).map((item) => (
-              <button
-                key={item.word}
-                onClick={() => {
-                  onSelect(item.word);
-                  if (isMobile) onOpenChange(false);
-                }}
-                className={`
-                  px-4 py-3 rounded-lg text-sm font-medium text-left
-                  transition-colors break-words
-                  ${
-                    currentWord === item.word
-                    ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                    : "bg-gray-100 text-gray-800 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
-                  }
-                `}
-              >
-                {item.word}
-              </button>
+              <div key={item.word} className="flex items-center gap-1">
+                <button
+                  onClick={() => {
+                    onSelect(item.word);
+                    if (isMobile) onOpenChange(false);
+                  }}
+                  className={`
+                    flex-1 px-4 py-3 rounded-lg text-sm font-medium text-left
+                    transition-colors break-words
+                    ${
+                      currentWord === item.word
+                      ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                      : "bg-gray-100 text-gray-800 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+                    }
+                  `}
+                >
+                  {item.word}
+                </button>
+                <a
+                  href={getPapagoUrl(item.word)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                  title="Papago에서 번역"
+                >
+                  <ExternalLink size={16} />
+                </a>
+              </div>
             ))}
           </div>
         </div>
