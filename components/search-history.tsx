@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { getHistory, type SearchHistory } from '@/utils/storage';
-import { History, ChevronDown, ChevronUp, X, ExternalLink } from 'lucide-react';
+import { History, ChevronDown, ChevronUp, X, ExternalLink, Volume2 } from 'lucide-react';
+import { speakWithElevenLabs } from '@/utils/tts';
 
 interface SearchHistoryProps {
   onSelect: (word: string) => void;
@@ -96,6 +97,13 @@ export function SearchHistory({ onSelect, currentWord, isOpen, onOpenChange }: S
                   `}
                 >
                   {item.word}
+                </button>
+                <button
+                  onClick={() => speakWithElevenLabs(item.word)}
+                  className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                  title="발음 듣기"
+                >
+                  <Volume2 size={16} />
                 </button>
                 <a
                   href={getPapagoUrl(item.word)}
