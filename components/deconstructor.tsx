@@ -96,9 +96,9 @@ const OriginNode = ({
 }) => {
   const [isLoading] = useAtom(isLoadingAtom);
   
-  const handleNodeClick = async () => {
+  const handleNodeClick = async (text: string) => {
     try {
-      await navigator.clipboard.writeText(data.originalWord);
+      await navigator.clipboard.writeText(text);
       toast.success('클립보드에 복사되었습니다', {
         description: '이 단어를 분석합니다...'
       });
@@ -107,7 +107,7 @@ const OriginNode = ({
       const analyzeButton = document.querySelector('[data-analyze-button="true"]') as HTMLButtonElement;
       
       if (input && analyzeButton) {
-        input.value = data.originalWord;
+        input.value = text;
         input.focus();
         setTimeout(() => {
           analyzeButton.click();
@@ -135,22 +135,37 @@ const OriginNode = ({
     }`}>
       <div 
         className="px-4 py-2 rounded-lg bg-card border border-border min-w-fit max-w-[180px] cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-        onClick={handleNodeClick}
+        onClick={() => handleNodeClick(data.originalWord)}
         title="클릭하여 이 단어 분석하기"
       >
         <div className="flex flex-col items-start">
           <p 
             className="text-lg font-serif mb-1 whitespace-nowrap cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 text-card-foreground"
-            onClick={handleSpeak}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleSpeak();
+            }}
             title="클릭하여 발음 듣기"
           >
             {data.originalWord}
           </p>
-          <p className="text-xs text-muted-foreground w-full">{data.origin}</p>
+          <p 
+            className="text-xs text-muted-foreground w-full cursor-pointer hover:text-blue-600 dark:hover:text-blue-400"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleNodeClick(data.origin);
+            }}
+            title="클릭하여 이 단어 분석하기"
+          >
+            {data.origin}
+          </p>
           <p 
             className="text-xs text-card-foreground w-full cursor-pointer hover:text-blue-600 dark:hover:text-blue-400"
-            onClick={handleMeaningSpeak}
-            title="클릭하여 의미 듣기"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleNodeClick(data.meaning);
+            }}
+            title="클릭하여 이 단어 분석하기"
           >
             {data.meaning}
           </p>
@@ -168,9 +183,9 @@ const CombinedNode = ({
   data: { text: string; definition: string };
 }) => {
   
-  const handleNodeClick = async () => {
+  const handleNodeClick = async (text: string) => {
     try {
-      await navigator.clipboard.writeText(data.text);
+      await navigator.clipboard.writeText(text);
       toast.success('클립보드에 복사되었습니다', {
         description: '이 단어를 분석합니다...'
       });
@@ -179,7 +194,7 @@ const CombinedNode = ({
       const analyzeButton = document.querySelector('[data-analyze-button="true"]') as HTMLButtonElement;
       
       if (input && analyzeButton) {
-        input.value = data.text;
+        input.value = text;
         input.focus();
         setTimeout(() => {
           analyzeButton.click();
@@ -202,30 +217,32 @@ const CombinedNode = ({
   };
 
   return (
-    <div className={`flex flex-col items-stretch transition-all duration-1000`}>
+    <div className="flex flex-col items-stretch transition-all duration-1000">
       <div 
         className="px-4 py-2 rounded-lg bg-card border border-border min-w-fit max-w-[250px] cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-        onClick={handleNodeClick}
+        onClick={() => handleNodeClick(data.text)}
         title="클릭하여 이 단어 분석하기"
       >
         <div className="flex flex-col items-start">
           <p 
-            className="text-xl font-serif mb-1 whitespace-nowrap cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 text-card-foreground group"
-            onClick={handleSpeak}
+            className="text-xl font-serif mb-1 whitespace-nowrap cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 text-card-foreground"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleSpeak();
+            }}
             title="클릭하여 발음 듣기"
           >
-            <span className="group-hover:after:ml-2 group-hover:after:text-sm">
-              {data.text}
-            </span>
+            {data.text}
           </p>
           <p 
             className="text-sm text-card-foreground w-full cursor-pointer hover:text-blue-600 dark:hover:text-blue-400"
-            onClick={handleDefinitionSpeak}
-            title="클릭하여 의미 듣기"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleNodeClick(data.definition);
+            }}
+            title="클릭하여 이 단어 분석하기"
           >
-            <span className="group-hover:after:ml-2 group-hover:after:text-sm">
-              {data.definition}
-            </span>
+            {data.definition}
           </p>
         </div>
       </div>
@@ -499,31 +516,56 @@ const nodeTypes = {
   inputNode: InputNode,
 };
 
-function Deconstructor({ word }: { word?: string }) {
+interface DeconstructorProps {
+  initialWord?: string;
+  onWordChange?: (word: string) => void;
+}
+
+function Deconstructor({ initialWord, onWordChange }: DeconstructorProps) {
   const [isLoading, setIsLoading] = useAtom(isLoadingAtom);
   const { theme } = useTheme();
   const [definition, setDefinition] = useState<Definition>(() => {
     const cached = getCachedDefinition("우리가 사랑한 한국어");
     return cached || defaultDefinition;
   });
-  const [currentWord, setCurrentWord] = useState<string>('우리가 사랑한 한국어');
+  const [currentWord, setCurrentWord] = useState<string>(initialWord || "우리가 사랑한 한국어");
   const plausible = usePlausible();
   const [historyOpen, setHistoryOpen] = useState(false);
 
   const DEFAULT_WORD = "우리가 사랑한 한국어";
   const BOOK_URL = "https://talktomeinkorean.com/product/2023-hanguel-day/";
 
-  const handleWordSubmit = async (word: string) => {
-    console.log("handleWordSubmit", word);
+  // URL을 통한 초기 분석 처리
+  useEffect(() => {
+    if (initialWord) {
+      setCurrentWord(initialWord);
+      handleAnalyze(initialWord);
+    }
+  }, [initialWord]);
+
+  // 단어가 변경될 때마다 URL 업데이트
+  const handleWordChange = (word: string) => {
     setCurrentWord(word);
+    onWordChange?.(word);
+  };
+
+  // 분석 함수 수정
+  const handleAnalyze = async (wordToAnalyze?: string) => {
+    const wordToUse = wordToAnalyze || currentWord;
+    if (!wordToUse.trim()) {
+      toast.error("분석할 단어를 입력해주세요");
+      return;
+    }
+
+    handleWordChange(wordToUse); // URL 업데이트
     setIsLoading(true);
-    
+
     try {
       // 캐시 확인
-      const cached = getCachedDefinition(word);
+      const cached = getCachedDefinition(wordToUse);
       if (cached) {
         setDefinition(cached);
-        addToHistory(word);
+        addToHistory(wordToUse);
         setIsLoading(false);
         return;
       }
@@ -532,7 +574,7 @@ function Deconstructor({ word }: { word?: string }) {
       const response = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ word }),
+        body: JSON.stringify({ word: wordToUse }),
       });
 
       if (!response.ok) {
@@ -543,13 +585,13 @@ function Deconstructor({ word }: { word?: string }) {
       const parsed = wordSchema.parse(data);
       
       setDefinition(parsed);
-      cacheDefinition(word, parsed);
-      addToHistory(word);
+      cacheDefinition(wordToUse, parsed);
+      addToHistory(wordToUse);
       
       // Analytics
       plausible('analyze', {
         props: {
-          word,
+          word: wordToUse,
         },
       });
     } catch (err) {
@@ -560,24 +602,9 @@ function Deconstructor({ word }: { word?: string }) {
     }
   };
 
-  useEffect(() => {
-    if (!word && currentWord === DEFAULT_WORD) {
-      // 이미 기본 단어가 로드되어 있으면 스킵
-      return;
-    }
-    
-    async function fetchDefinition() {
-      const wordToAnalyze = word || DEFAULT_WORD;
-      setIsLoading(true);
-      await handleWordSubmit(wordToAnalyze);
-      setIsLoading(false);
-    }
-    fetchDefinition();
-  }, [word]);
-
   const { initialNodes, initialEdges } = useMemo(
-    () => createInitialNodes(definition, handleWordSubmit, word),
-    [definition, word]
+    () => createInitialNodes(definition, handleAnalyze, initialWord),
+    [definition, initialWord]
   );
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
@@ -649,7 +676,7 @@ function Deconstructor({ word }: { word?: string }) {
       </div>
 
       <SearchHistory 
-        onSelect={handleWordSubmit} 
+        onSelect={handleAnalyze} 
         currentWord={currentWord}
         isOpen={historyOpen}
         onOpenChange={setHistoryOpen}
@@ -672,7 +699,7 @@ function Deconstructor({ word }: { word?: string }) {
   );
 }
 
-export default function WordDeconstructor({ word }: { word?: string }) {
+export default function WordDeconstructor({ initialWord }: DeconstructorProps) {
   const [isLoading] = useAtom(isLoadingAtom);
 
   return (
@@ -684,7 +711,7 @@ export default function WordDeconstructor({ word }: { word?: string }) {
     >
       <div className="h-full w-full">
         <ReactFlowProvider>
-          <Deconstructor word={word} />
+          <Deconstructor initialWord={initialWord} />
         </ReactFlowProvider>
       </div>
     </div>

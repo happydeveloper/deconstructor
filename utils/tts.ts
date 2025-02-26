@@ -40,9 +40,13 @@ async function playAudio(audioBlob: Blob) {
   try {
     // 이전 오디오가 있다면 정리
     if (window._currentAudio) {
-      window._currentAudio.pause();
-      window._currentAudio.src = '';
-      URL.revokeObjectURL(window._currentAudio.src);
+      try {
+        window._currentAudio.pause();
+        window._currentAudio.src = '';
+        URL.revokeObjectURL(window._currentAudio.src);
+      } catch (error) {
+        console.error('Failed to cleanup previous audio:', error);
+      }
       window._currentAudio = null;
     }
 
@@ -52,9 +56,33 @@ async function playAudio(audioBlob: Blob) {
     
     // 오디오 이벤트 핸들러 설정
     audio.onerror = (e) => {
-      console.error('Audio playback error:', e);
+      const error = e as ErrorEvent;
+      console.error('Audio playback error:', {
+        message: error.message,
+        filename: error.filename,
+        lineno: error.lineno,
+        colno: error.colno,
+        error: error.error
+      });
+      
       URL.revokeObjectURL(audioUrl);
-      toast.error('오디오 재생 중 오류가 발생했습니다');
+      window._currentAudio = null;
+      
+      toast.error('오디오 재생 중 오류가 발생했습니다', {
+        description: '브라우저 TTS로 전환합니다',
+        duration: 3000
+      });
+      
+      // 브라우저 TTS로 폴백
+      if (window._currentAudio === audio) {
+        speakWithBrowser(audio.title || '');
+      }
+    };
+
+    audio.onabort = () => {
+      console.log('Audio playback aborted');
+      URL.revokeObjectURL(audioUrl);
+      window._currentAudio = null;
     };
 
     audio.onended = () => {
@@ -63,20 +91,44 @@ async function playAudio(audioBlob: Blob) {
     };
 
     // 오디오 로드 및 재생
-    audio.src = audioUrl;
-    await audio.load(); // 명시적으로 로드
-    window._currentAudio = audio;
-    
     try {
+      audio.src = audioUrl;
+      await audio.load(); // 명시적으로 로드
+      
+      // 재생 시도 전에 오디오가 정상인지 확인
+      if (audio.error) {
+        throw new Error(`Audio loading failed: ${audio.error.message}`);
+      }
+      
+      window._currentAudio = audio;
       await audio.play();
+      
     } catch (playError) {
       console.error('Audio play error:', playError);
       URL.revokeObjectURL(audioUrl);
       window._currentAudio = null;
+      
+      toast.error('오디오 재생에 실패했습니다', {
+        description: '브라우저 TTS로 전환합니다',
+        duration: 3000
+      });
+      
+      // 브라우저 TTS로 폴백
+      if (window._currentAudio === audio) {
+        speakWithBrowser(audio.title || '');
+      }
+      
       throw playError;
     }
   } catch (error) {
     console.error('playAudio error:', error);
+    
+    // 일반적인 오류 처리
+    toast.error('오디오 시스템 오류', {
+      description: '브라우저 TTS로 전환합니다',
+      duration: 3000
+    });
+    
     throw error;
   }
 }
@@ -213,14 +265,15 @@ async function speakWithElevenLabs(text: string) {
     }
 
   } catch (error) {
-    if (error instanceof Error && error.message === 'User cancelled retry') {
-      toast.error('음성 생성이 취소되었습니다.', {
-        description: "브라우저 TTS로 전환합니다.",
-        duration: 3000,
-      });
-    } else {
-      toast.error('음성 생성에 실패했습니다.', {
-        description: "브라우저 TTS로 전환합니다.",
+    console.error('ElevenLabs TTS 실패:', error);
+    
+    if (error instanceof Error) {
+      const errorMessage = error.message === 'User cancelled retry' 
+        ? '음성 생성이 취소되었습니다'
+        : '음성 생성에 실패했습니다';
+      
+      toast.error(errorMessage, {
+        description: "브라우저 TTS로 전환합니다",
         duration: 3000,
         action: {
           label: "재시도",
@@ -228,7 +281,7 @@ async function speakWithElevenLabs(text: string) {
         }
       });
     }
-    console.error('ElevenLabs TTS 실패:', error);
+    
     speakWithBrowser(text);
   }
 }
