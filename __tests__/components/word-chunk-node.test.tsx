@@ -1,11 +1,11 @@
-import { test, expect, beforeEach, afterEach } from "bun:test";
+import { describe, it, expect, beforeEach, afterEach } from 'jest';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { WordChunkNode } from '@/components/nodes/word-chunk-node';
 import { Provider } from 'jotai';
 import { expect as jestExpect } from '@jest/globals';
 import '@testing-library/jest-dom';
 
-test("WordChunkNode", () => {
+describe("WordChunkNode", () => {
   const mockData = {
     text: '테스트'
   };
@@ -22,7 +22,7 @@ test("WordChunkNode", () => {
     document.body.innerHTML = '';
   });
 
-  test('renders node with correct text', () => {
+  it('renders node with correct text', () => {
     render(
       <Provider>
         <WordChunkNode data={mockData} />
@@ -32,7 +32,7 @@ test("WordChunkNode", () => {
     expect(element).toBeDefined();
   });
 
-  test('handles TTS functionality', () => {
+  it('handles TTS functionality', () => {
     const mockSpeak = jest.fn();
     window.speechSynthesis = { speak: mockSpeak } as unknown as SpeechSynthesis;
 
@@ -48,7 +48,7 @@ test("WordChunkNode", () => {
     expect(mockSpeak).toHaveBeenCalled();
   });
 
-  test('prevents event propagation on TTS button click', () => {
+  it('prevents event propagation on TTS button click', () => {
     const mockStopPropagation = jest.fn();
 
     render(

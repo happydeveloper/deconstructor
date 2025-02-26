@@ -2,9 +2,9 @@
 
 import WordDeconstructor from "@/components/deconstructor";
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { Suspense } from 'react';
 
-export default function Home() {
+function WordAnalyzer() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const text = searchParams.get('text');
@@ -20,11 +20,23 @@ export default function Home() {
   };
 
   return (
+    <WordDeconstructor 
+      initialWord={initialWord} 
+      onWordChange={updateUrl}
+    />
+  );
+}
+
+export default function Home() {
+  return (
     <main>
-      <WordDeconstructor 
-        initialWord={initialWord} 
-        onWordChange={updateUrl}
-      />
+      <Suspense fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-pulse">Loading...</div>
+        </div>
+      }>
+        <WordAnalyzer />
+      </Suspense>
     </main>
   );
 }

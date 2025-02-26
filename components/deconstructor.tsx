@@ -125,10 +125,6 @@ const OriginNode = ({
     speakSequentially([data.originalWord, data.meaning]);
   };
 
-  const handleMeaningSpeak = () => {
-    speak(data.meaning);
-  };
-
   return (
     <div className={`flex flex-col items-stretch transition-all duration-1000 ${
       isLoading ? "opacity-0 blur-[20px]" : ""
@@ -210,10 +206,6 @@ const CombinedNode = ({
 
   const handleSpeak = () => {
     speakSequentially([data.text, data.definition]);
-  };
-
-  const handleDefinitionSpeak = () => {
-    speak(data.definition);
   };
 
   return (
@@ -532,7 +524,6 @@ function Deconstructor({ initialWord, onWordChange }: DeconstructorProps) {
   const plausible = usePlausible();
   const [historyOpen, setHistoryOpen] = useState(false);
 
-  const DEFAULT_WORD = "우리가 사랑한 한국어";
   const BOOK_URL = "https://talktomeinkorean.com/product/2023-hanguel-day/";
 
   // URL을 통한 초기 분석 처리

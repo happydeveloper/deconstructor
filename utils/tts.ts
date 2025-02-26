@@ -54,6 +54,9 @@ async function playAudio(audioBlob: Blob) {
     const audioUrl = URL.createObjectURL(audioBlob);
     const audio = new Audio();
     
+    // 텍스트를 저장할 커스텀 속성 추가
+    const textContent = '';
+    
     // 오디오 이벤트 핸들러 설정
     audio.onerror = (e) => {
       const error = e as ErrorEvent;
@@ -75,7 +78,7 @@ async function playAudio(audioBlob: Blob) {
       
       // 브라우저 TTS로 폴백
       if (window._currentAudio === audio) {
-        speakWithBrowser(audio.title || '');
+        speakWithBrowser(textContent);
       }
     };
 
@@ -115,7 +118,7 @@ async function playAudio(audioBlob: Blob) {
       
       // 브라우저 TTS로 폴백
       if (window._currentAudio === audio) {
-        speakWithBrowser(audio.title || '');
+        speakWithBrowser(textContent);
       }
       
       throw playError;
