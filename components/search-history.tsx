@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react';
 import { getHistory, type SearchHistory } from '@/utils/storage';
 import { History, ChevronDown, ChevronUp, X, ExternalLink, Volume2 } from 'lucide-react';
 import { speakWithElevenLabs } from '@/utils/tts';
+import { useAtom } from "jotai";
+import { ttsEnabledAtom } from "./tts-toggle";
+import { speak } from "@/utils/tts";
 
 interface SearchHistoryProps {
   onSelect: (word: string) => void;
@@ -20,6 +23,8 @@ const getPapagoUrl = (text: string) => {
 export function SearchHistory({ onSelect, currentWord, isOpen, onOpenChange }: SearchHistoryProps) {
   const [history, setHistory] = useState<SearchHistory[]>([]);
   const [isMobile, setIsMobile] = useState(false);
+  const [ttsEnabled] = useAtom(ttsEnabledAtom);
+  const [localTTSEnabled, setLocalTTSEnabled] = useState(ttsEnabled);
 
   useEffect(() => {
     setHistory(getHistory());
@@ -37,11 +42,46 @@ export function SearchHistory({ onSelect, currentWord, isOpen, onOpenChange }: S
     window.addEventListener('resize', handleResize);
     document.addEventListener('wordAnalyzed', handleWordAnalyzed);
     
+    // TTS 상태 변경 이벤트 리스너
+    const handleTTSStateChange = (event: CustomEvent<{ enabled: boolean }>) => {
+      setLocalTTSEnabled(event.detail.enabled);
+    };
+
+    document.addEventListener('ttsStateChange', handleTTSStateChange as EventListener);
+    
     return () => {
       window.removeEventListener('resize', handleResize);
       document.removeEventListener('wordAnalyzed', handleWordAnalyzed);
+      document.removeEventListener('ttsStateChange', handleTTSStateChange as EventListener);
     };
   }, [onOpenChange]);
+
+  useEffect(() => {
+    setLocalTTSEnabled(ttsEnabled);
+  }, [ttsEnabled]);
+
+  const handleSpeak = (word: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (localTTSEnabled) {
+      speak(word);
+    }
+  };
+
+  // 사운드 버튼 렌더링 함수
+  const renderSoundButton = (word: string) => (
+    <button
+      onClick={(e) => handleSpeak(word, e)}
+      className={`p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800 
+        ${localTTSEnabled 
+          ? 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300' 
+          : 'text-gray-400 cursor-not-allowed opacity-50'
+        }`}
+      title={localTTSEnabled ? "발음 듣기" : "TTS 비활성화됨"}
+      disabled={!localTTSEnabled}
+    >
+      <Volume2 size={16} />
+    </button>
+  );
 
   if (history.length === 0) return null;
 
@@ -98,13 +138,7 @@ export function SearchHistory({ onSelect, currentWord, isOpen, onOpenChange }: S
                 >
                   {item.word}
                 </button>
-                <button
-                  onClick={() => speakWithElevenLabs(item.word)}
-                  className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-                  title="발음 듣기"
-                >
-                  <Volume2 size={16} />
-                </button>
+                {renderSoundButton(item.word)}
                 <a
                   href={getPapagoUrl(item.word)}
                   target="_blank"
