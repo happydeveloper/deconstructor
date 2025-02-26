@@ -27,18 +27,15 @@ import { SearchHistory } from "./search-history";
 import { ExternalLink, History, ChevronUp, ChevronDown, Book } from "lucide-react";
 import { defaultDefinition } from '@/types/definition';
 import type { Definition } from '@/types/definition';
+import { speak, speakSequentially } from "@/utils/tts";
 
 const isLoadingAtom = atom(false);
 
 const WordChunkNode = ({ data }: { data: { text: string } }) => {
   const [isLoading] = useAtom(isLoadingAtom);
-  const [ttsEnabled] = useAtom(ttsEnabledAtom);
   
-  const speak = () => {
-    if (!ttsEnabled) return;
-    const utterance = new SpeechSynthesisUtterance(data.text);
-    utterance.lang = /[a-zA-Z]/.test(data.text) ? 'en-US' : 'ko-KR';
-    window.speechSynthesis.speak(utterance);
+  const handleSpeak = () => {
+    speak(data.text);
   };
 
   return (
@@ -48,7 +45,7 @@ const WordChunkNode = ({ data }: { data: { text: string } }) => {
       <div 
         className="text-5xl font-serif mb-1 cursor-pointer transition-colors bg-card rounded-lg px-4 py-2"
         title="클릭하여 발음 듣기"
-        onClick={speak}
+        onClick={handleSpeak}
       >
         <span className="text-card-foreground hover:text-blue-600 dark:hover:text-blue-400">
           {data.text}
@@ -68,18 +65,12 @@ const OriginNode = ({
   const [isLoading] = useAtom(isLoadingAtom);
   const [ttsEnabled] = useAtom(ttsEnabledAtom);
   
-  const speak = () => {
-    if (!ttsEnabled) return;
-    const originalUtterance = new SpeechSynthesisUtterance(data.originalWord);
-    originalUtterance.lang = /[a-zA-Z]/.test(data.originalWord) ? 'en-US' : 'ko-KR';
-    
-    const meaningUtterance = new SpeechSynthesisUtterance(data.meaning);
-    meaningUtterance.lang = 'ko-KR';
-    
-    window.speechSynthesis.speak(originalUtterance);
-    originalUtterance.onend = () => {
-      window.speechSynthesis.speak(meaningUtterance);
-    };
+  const handleSpeak = () => {
+    speakSequentially([data.originalWord, data.meaning]);
+  };
+
+  const handleMeaningSpeak = () => {
+    speak(data.meaning);
   };
 
   return (
@@ -90,7 +81,7 @@ const OriginNode = ({
         <div className="flex flex-col items-start">
           <p 
             className="text-lg font-serif mb-1 whitespace-nowrap cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 text-card-foreground"
-            onClick={speak}
+            onClick={handleSpeak}
             title="클릭하여 발음 듣기"
           >
             {data.originalWord}
@@ -98,12 +89,7 @@ const OriginNode = ({
           <p className="text-xs text-muted-foreground w-full">{data.origin}</p>
           <p 
             className="text-xs text-card-foreground w-full cursor-pointer hover:text-blue-600 dark:hover:text-blue-400"
-            onClick={() => {
-              if (!ttsEnabled) return;
-              const meaningUtterance = new SpeechSynthesisUtterance(data.meaning);
-              meaningUtterance.lang = 'ko-KR';
-              window.speechSynthesis.speak(meaningUtterance);
-            }}
+            onClick={handleMeaningSpeak}
             title="클릭하여 의미 듣기"
           >
             {data.meaning}
@@ -123,18 +109,12 @@ const CombinedNode = ({
 }) => {
   const [ttsEnabled] = useAtom(ttsEnabledAtom);
   
-  const speak = () => {
-    if (!ttsEnabled) return;
-    const textUtterance = new SpeechSynthesisUtterance(data.text);
-    textUtterance.lang = /[a-zA-Z]/.test(data.text) ? 'en-US' : 'ko-KR';
-    
-    const definitionUtterance = new SpeechSynthesisUtterance(data.definition);
-    definitionUtterance.lang = 'ko-KR';
-    
-    window.speechSynthesis.speak(textUtterance);
-    textUtterance.onend = () => {
-      window.speechSynthesis.speak(definitionUtterance);
-    };
+  const handleSpeak = () => {
+    speakSequentially([data.text, data.definition]);
+  };
+
+  const handleDefinitionSpeak = () => {
+    speak(data.definition);
   };
 
   return (
@@ -143,7 +123,7 @@ const CombinedNode = ({
         <div className="flex flex-col items-start">
           <p 
             className="text-xl font-serif mb-1 whitespace-nowrap cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 text-card-foreground group"
-            onClick={speak}
+            onClick={handleSpeak}
             title="클릭하여 발음 듣기"
           >
             <span className="group-hover:after:ml-2 group-hover:after:text-sm">
@@ -152,12 +132,7 @@ const CombinedNode = ({
           </p>
           <p 
             className="text-sm text-card-foreground w-full cursor-pointer hover:text-blue-600 dark:hover:text-blue-400"
-            onClick={() => {
-              if (!ttsEnabled) return;
-              const definitionUtterance = new SpeechSynthesisUtterance(data.definition);
-              definitionUtterance.lang = 'ko-KR';
-              window.speechSynthesis.speak(definitionUtterance);
-            }}
+            onClick={handleDefinitionSpeak}
             title="클릭하여 의미 듣기"
           >
             <span className="group-hover:after:ml-2 group-hover:after:text-sm">

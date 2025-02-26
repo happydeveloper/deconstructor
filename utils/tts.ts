@@ -1,4 +1,6 @@
 import { toast } from 'sonner';
+import { ttsEnabledAtom } from '@/components/tts-toggle';
+import { getDefaultStore } from 'jotai';
 
 const ELEVENLABS_API_KEY = process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY;
 const CACHE_DURATION = 1000 * 60 * 60 * 24 * 7; // 7일
@@ -64,29 +66,65 @@ export function detectLanguage(text: string): "ko" | "en" {
 }
 
 export function speak(text: string, lang?: string) {
+  // TTS 상태 확인
+  const store = getDefaultStore();
+  const ttsEnabled = store.get(ttsEnabledAtom);
+
+  if (!ttsEnabled) {
+    console.log('TTS가 비활성화되어 있어 실행되지 않음');
+    return;
+  }
+
   const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = lang || (detectLanguage(text) === "ko" ? "ko-KR" : "en-US");
+  utterance.lang = lang || (/[a-zA-Z]/.test(text) ? 'en-US' : 'ko-KR');
   window.speechSynthesis.speak(utterance);
   return utterance;
 }
 
 export function speakSequentially(texts: string[], langs?: string[]) {
+  // TTS 상태 확인
+  const store = getDefaultStore();
+  const ttsEnabled = store.get(ttsEnabledAtom);
+
+  if (!ttsEnabled) {
+    console.log('TTS가 비활성화되어 있어 실행되지 않음');
+    return;
+  }
+
   let currentIndex = 0;
   
   const speakNext = () => {
     if (currentIndex >= texts.length) return;
     
-    const utterance = speak(texts[currentIndex], langs?.[currentIndex]);
+    const utterance = new SpeechSynthesisUtterance(texts[currentIndex]);
+    utterance.lang = langs?.[currentIndex] || (/[a-zA-Z]/.test(texts[currentIndex]) ? 'en-US' : 'ko-KR');
     utterance.onend = () => {
       currentIndex++;
       speakNext();
     };
+    window.speechSynthesis.speak(utterance);
   };
 
   speakNext();
 }
 
 export async function speakWithElevenLabs(text: string) {
+  // TTS 활성화 상태 확인
+  const store = getDefaultStore();
+  const ttsEnabled = store.get(ttsEnabledAtom);
+  
+  if (!ttsEnabled) {
+    console.log('TTS가 비활성화되어 있어 실행되지 않음');
+    return;
+  }
+
+  // 현재 재생 중인 오디오가 있으면 중지
+  if (window._currentAudio) {
+    window._currentAudio.pause();
+    URL.revokeObjectURL(window._currentAudio.src);
+    window._currentAudio = null;
+  }
+
   if (!ELEVENLABS_API_KEY) {
     toast.error('ElevenLabs API 키가 설정되지 않았습니다.', {
       description: 'API 키를 .env.local 파일에 설정해주세요.',

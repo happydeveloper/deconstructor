@@ -17,6 +17,7 @@ export function CombinedNode({ data }: CombinedNodeProps) {
   const [ttsEnabled] = useAtom(ttsEnabledAtom);
 
   const handleSpeak = () => {
+    console.log('TTS 상태:', ttsEnabled);
     if (!ttsEnabled) return;
     speakSequentially([data.text, data.definition]);
   };

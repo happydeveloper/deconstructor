@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 import PlausibleProvider from "next-plausible";
 import Outbound from "@/components/outbound";
-import { Providers } from './providers'
+import { Providers } from "@/components/providers";
 
 const notoSerif = Noto_Serif({
   subsets: ["latin"],
