@@ -35,23 +35,50 @@ function cleanupCache() {
   }
 }
 
-// 오디오 재생 함수
+// 오디오 재생 함수 수정
 async function playAudio(audioBlob: Blob) {
-  const audioUrl = URL.createObjectURL(audioBlob);
-  
-  if (window._currentAudio) {
-    window._currentAudio.pause();
-    URL.revokeObjectURL(window._currentAudio.src);
-  }
-  
-  const audio = new Audio(audioUrl);
-  window._currentAudio = audio;
-  await audio.play();
+  try {
+    // 이전 오디오가 있다면 정리
+    if (window._currentAudio) {
+      window._currentAudio.pause();
+      window._currentAudio.src = '';
+      URL.revokeObjectURL(window._currentAudio.src);
+      window._currentAudio = null;
+    }
 
-  audio.onended = () => {
-    URL.revokeObjectURL(audioUrl);
-    window._currentAudio = null;
-  };
+    // 새 오디오 URL 생성
+    const audioUrl = URL.createObjectURL(audioBlob);
+    const audio = new Audio();
+    
+    // 오디오 이벤트 핸들러 설정
+    audio.onerror = (e) => {
+      console.error('Audio playback error:', e);
+      URL.revokeObjectURL(audioUrl);
+      toast.error('오디오 재생 중 오류가 발생했습니다');
+    };
+
+    audio.onended = () => {
+      URL.revokeObjectURL(audioUrl);
+      window._currentAudio = null;
+    };
+
+    // 오디오 로드 및 재생
+    audio.src = audioUrl;
+    await audio.load(); // 명시적으로 로드
+    window._currentAudio = audio;
+    
+    try {
+      await audio.play();
+    } catch (playError) {
+      console.error('Audio play error:', playError);
+      URL.revokeObjectURL(audioUrl);
+      window._currentAudio = null;
+      throw playError;
+    }
+  } catch (error) {
+    console.error('playAudio error:', error);
+    throw error;
+  }
 }
 
 // 텍스트에서 언어 비율 계산
@@ -71,6 +98,36 @@ function getLanguageRatio(text: string): { ko: number; en: number } {
 // 언어 감지 함수 수정 - 한글이 있으면 무조건 한국어로 처리
 export function detectLanguage(text: string): "ko" | "en" {
   return /[가-힣]/.test(text) ? "ko" : "en";
+}
+
+// 재시도 횟수 설정
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000; // 1초
+
+// 재시도 로직을 포함한 API 호출 함수
+async function fetchWithRetry(url: string, options: RequestInit, retries = MAX_RETRIES): Promise<Response> {
+  try {
+    const response = await fetch(url, options);
+    if (!response.ok) throw new Error('API request failed');
+    return response;
+  } catch (error) {
+    if (retries > 0) {
+      toast.error('음성 생성 중 오류가 발생했습니다.', {
+        description: `${MAX_RETRIES - retries + 1}번째 재시도 중...`,
+        duration: 2000,
+        action: {
+          label: "취소",
+          onClick: () => {
+            throw new Error('User cancelled retry');
+          }
+        }
+      });
+      
+      await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+      return fetchWithRetry(url, options, retries - 1);
+    }
+    throw error;
+  }
 }
 
 // 통합 TTS 함수
@@ -110,11 +167,16 @@ async function speakWithElevenLabs(text: string) {
     // 캐시 확인
     const cached = audioCache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-      await playAudio(cached.blob);
-      return;
+      try {
+        await playAudio(cached.blob);
+        return;
+      } catch (error) {
+        console.error('Cached audio playback failed:', error);
+        audioCache.delete(cacheKey); // 캐시 삭제
+      }
     }
 
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
       {
         method: 'POST',
@@ -136,27 +198,37 @@ async function speakWithElevenLabs(text: string) {
       }
     );
 
-    if (!response.ok) {
-      throw new Error('Failed to generate speech');
-    }
-
     const audioBlob = await response.blob();
     
-    // 캐시 저장
-    audioCache.set(cacheKey, {
-      blob: audioBlob,
-      timestamp: Date.now()
-    });
-
-    // 캐시 크기가 100개를 넘으면 오래된 항목 정리
-    if (audioCache.size > 100) {
-      cleanupCache();
+    try {
+      await playAudio(audioBlob);
+      // 성공적으로 재생된 경우에만 캐시에 저장
+      audioCache.set(cacheKey, {
+        blob: audioBlob,
+        timestamp: Date.now()
+      });
+    } catch (error) {
+      console.error('New audio playback failed:', error);
+      throw error;
     }
 
-    await playAudio(audioBlob);
-
   } catch (error) {
-    console.error('ElevenLabs TTS 실패, 브라우저 TTS로 대체:', error);
+    if (error instanceof Error && error.message === 'User cancelled retry') {
+      toast.error('음성 생성이 취소되었습니다.', {
+        description: "브라우저 TTS로 전환합니다.",
+        duration: 3000,
+      });
+    } else {
+      toast.error('음성 생성에 실패했습니다.', {
+        description: "브라우저 TTS로 전환합니다.",
+        duration: 3000,
+        action: {
+          label: "재시도",
+          onClick: () => speakWithElevenLabs(text)
+        }
+      });
+    }
+    console.error('ElevenLabs TTS 실패:', error);
     speakWithBrowser(text);
   }
 }

@@ -32,6 +32,33 @@ const isLoadingAtom = atom(false);
 const WordChunkNode = ({ data }: { data: { text: string } }) => {
   const [isLoading] = useAtom(isLoadingAtom);
   
+  const handleNodeClick = async () => {
+    try {
+      // 클립보드에 복사
+      await navigator.clipboard.writeText(data.text);
+      toast.success('클립보드에 복사되었습니다', {
+        description: '이 단어를 분석합니다...'
+      });
+
+      // 입력창에 설정하고 분석 실행
+      const input = document.querySelector('[data-word-input="true"]') as HTMLInputElement;
+      const analyzeButton = document.querySelector('[data-analyze-button="true"]') as HTMLButtonElement;
+      
+      if (input && analyzeButton) {
+        input.value = data.text;
+        input.focus();
+        setTimeout(() => {
+          analyzeButton.click();
+        }, 100); // 약간의 딜레이를 주어 UI 업데이트가 보이도록 함
+      }
+    } catch (error) {
+      console.error('클립보드 복사 실패:', error);
+      toast.error('클립보드 복사 실패', {
+        description: '하지만 분석은 계속됩니다'
+      });
+    }
+  };
+
   const handleSpeak = (e: React.MouseEvent) => {
     e.stopPropagation();
     speak(data.text);
@@ -42,15 +69,21 @@ const WordChunkNode = ({ data }: { data: { text: string } }) => {
       isLoading ? "opacity-0 blur-[20px]" : ""
     }`}>
       <div 
-        className="text-5xl font-serif mb-1 cursor-pointer transition-colors bg-card rounded-lg px-4 py-2"
-        title="클릭하여 발음 듣기"
-        onClick={handleSpeak}
+        className="bg-card rounded-lg p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group"
+        onClick={handleNodeClick}
+        title="클릭하여 이 단어 분석하기"
       >
-        <span className="text-card-foreground hover:text-blue-600 dark:hover:text-blue-400">
-          {data.text}
-        </span>
+        <div className="flex items-center gap-2">
+          <span 
+            onClick={handleSpeak}
+            className="text-xl font-serif cursor-pointer text-card-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400"
+            title="클릭하여 발음 듣기"
+          >
+            {data.text}
+          </span>
+        </div>
       </div>
-      <div className="w-full h-3 border border-t-0 border-gray-400 dark:border-gray-600" />
+      <div className="w-full h-3 border border-t-0 border-gray-400 dark:border-gray-800" />
       <Handle type="source" position={Position.Bottom} style={{ opacity: 0 }} />
     </div>
   );
@@ -63,6 +96,31 @@ const OriginNode = ({
 }) => {
   const [isLoading] = useAtom(isLoadingAtom);
   
+  const handleNodeClick = async () => {
+    try {
+      await navigator.clipboard.writeText(data.originalWord);
+      toast.success('클립보드에 복사되었습니다', {
+        description: '이 단어를 분석합니다...'
+      });
+
+      const input = document.querySelector('[data-word-input="true"]') as HTMLInputElement;
+      const analyzeButton = document.querySelector('[data-analyze-button="true"]') as HTMLButtonElement;
+      
+      if (input && analyzeButton) {
+        input.value = data.originalWord;
+        input.focus();
+        setTimeout(() => {
+          analyzeButton.click();
+        }, 100);
+      }
+    } catch (error) {
+      console.error('클립보드 복사 실패:', error);
+      toast.error('클립보드 복사 실패', {
+        description: '하지만 분석은 계속됩니다'
+      });
+    }
+  };
+
   const handleSpeak = () => {
     speakSequentially([data.originalWord, data.meaning]);
   };
@@ -75,7 +133,11 @@ const OriginNode = ({
     <div className={`flex flex-col items-stretch transition-all duration-1000 ${
       isLoading ? "opacity-0 blur-[20px]" : ""
     }`}>
-      <div className="px-4 py-2 rounded-lg bg-card border border-border min-w-fit max-w-[180px]">
+      <div 
+        className="px-4 py-2 rounded-lg bg-card border border-border min-w-fit max-w-[180px] cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+        onClick={handleNodeClick}
+        title="클릭하여 이 단어 분석하기"
+      >
         <div className="flex flex-col items-start">
           <p 
             className="text-lg font-serif mb-1 whitespace-nowrap cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 text-card-foreground"
@@ -106,6 +168,31 @@ const CombinedNode = ({
   data: { text: string; definition: string };
 }) => {
   
+  const handleNodeClick = async () => {
+    try {
+      await navigator.clipboard.writeText(data.text);
+      toast.success('클립보드에 복사되었습니다', {
+        description: '이 단어를 분석합니다...'
+      });
+
+      const input = document.querySelector('[data-word-input="true"]') as HTMLInputElement;
+      const analyzeButton = document.querySelector('[data-analyze-button="true"]') as HTMLButtonElement;
+      
+      if (input && analyzeButton) {
+        input.value = data.text;
+        input.focus();
+        setTimeout(() => {
+          analyzeButton.click();
+        }, 100);
+      }
+    } catch (error) {
+      console.error('클립보드 복사 실패:', error);
+      toast.error('클립보드 복사 실패', {
+        description: '하지만 분석은 계속됩니다'
+      });
+    }
+  };
+
   const handleSpeak = () => {
     speakSequentially([data.text, data.definition]);
   };
@@ -116,7 +203,11 @@ const CombinedNode = ({
 
   return (
     <div className={`flex flex-col items-stretch transition-all duration-1000`}>
-      <div className="px-4 py-2 rounded-lg bg-card border border-border min-w-fit max-w-[250px]">
+      <div 
+        className="px-4 py-2 rounded-lg bg-card border border-border min-w-fit max-w-[250px] cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+        onClick={handleNodeClick}
+        title="클릭하여 이 단어 분석하기"
+      >
         <div className="flex flex-col items-start">
           <p 
             className="text-xl font-serif mb-1 whitespace-nowrap cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 text-card-foreground group"
