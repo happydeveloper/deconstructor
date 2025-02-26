@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { getHistory, type SearchHistory } from '@/utils/storage';
-import { History, ChevronDown, ChevronUp, X, ExternalLink, Volume2 } from 'lucide-react';
+import { X, ExternalLink, Volume2 } from 'lucide-react';
 import { useAtom } from "jotai";
 import { ttsEnabledAtom } from "./tts-toggle";
 import { speak } from "@/utils/tts";

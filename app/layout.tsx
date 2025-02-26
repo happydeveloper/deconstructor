@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Noto_Serif } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
-import PlausibleProvider from "next-plausible";
 import Outbound from "@/components/outbound";
 import { Providers } from "@/components/providers";
 

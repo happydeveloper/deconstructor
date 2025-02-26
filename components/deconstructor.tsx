@@ -15,16 +15,14 @@ import {
 import "@xyflow/react/dist/style.css";
 import { useEffect, useState, useMemo } from "react";
 import { wordSchema } from "@/utils/schema";
-import { z } from "zod";
 import { atom, useAtom } from "jotai";
 import Spinner from "./spinner";
 import { toast } from "sonner";
 import { usePlausible } from "next-plausible";
 import { useTheme } from "next-themes";
-import { ttsEnabledAtom } from "./tts-toggle";
 import { addToHistory, getCachedDefinition, cacheDefinition } from "@/utils/storage";
 import { SearchHistory } from "./search-history";
-import { ExternalLink, History, ChevronUp, ChevronDown, Book } from "lucide-react";
+import { History, ChevronUp, ChevronDown, Book } from "lucide-react";
 import { defaultDefinition } from '@/types/definition';
 import type { Definition } from '@/types/definition';
 import { speak, speakSequentially } from "@/utils/tts";
@@ -34,7 +32,8 @@ const isLoadingAtom = atom(false);
 const WordChunkNode = ({ data }: { data: { text: string } }) => {
   const [isLoading] = useAtom(isLoadingAtom);
   
-  const handleSpeak = () => {
+  const handleSpeak = (e: React.MouseEvent) => {
+    e.stopPropagation();
     speak(data.text);
   };
 
@@ -63,7 +62,6 @@ const OriginNode = ({
   data: { originalWord: string; origin: string; meaning: string };
 }) => {
   const [isLoading] = useAtom(isLoadingAtom);
-  const [ttsEnabled] = useAtom(ttsEnabledAtom);
   
   const handleSpeak = () => {
     speakSequentially([data.originalWord, data.meaning]);
@@ -107,7 +105,6 @@ const CombinedNode = ({
 }: {
   data: { text: string; definition: string };
 }) => {
-  const [ttsEnabled] = useAtom(ttsEnabledAtom);
   
   const handleSpeak = () => {
     speakSequentially([data.text, data.definition]);
