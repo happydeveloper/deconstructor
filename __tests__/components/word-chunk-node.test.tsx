@@ -1,6 +1,7 @@
 import { render, fireEvent, screen } from '@testing-library/react';
 import { WordChunkNode } from '@/components/nodes/word-chunk-node';
 import { Provider } from 'jotai';
+import '@testing-library/jest-dom';
 
 describe('WordChunkNode', () => {
   const mockData = {
@@ -67,7 +68,10 @@ describe('WordChunkNode', () => {
     );
   });
 
-  it('prevents event propagation when clicking TTS button', () => {
+  it('handles TTS button click correctly', () => {
+    const mockSpeak = jest.fn();
+    window.speechSynthesis = { speak: mockSpeak } as any;
+
     render(
       <Provider>
         <WordChunkNode data={mockData} />
@@ -75,9 +79,23 @@ describe('WordChunkNode', () => {
     );
 
     const ttsButton = screen.getByTitle('발음 듣기');
-    const clickEvent = { stopPropagation: jest.fn() };
-    
-    fireEvent.click(ttsButton, clickEvent);
-    expect(clickEvent.stopPropagation).toHaveBeenCalled();
+    fireEvent.click(ttsButton);
+
+    expect(mockSpeak).toHaveBeenCalled();
+  });
+
+  it('prevents event propagation when clicking TTS button', () => {
+    const mockStopPropagation = jest.fn();
+
+    render(
+      <Provider>
+        <WordChunkNode data={mockData} />
+      </Provider>
+    );
+
+    const ttsButton = screen.getByTitle('발음 듣기');
+    fireEvent.click(ttsButton, { stopPropagation: mockStopPropagation });
+
+    expect(mockStopPropagation).toHaveBeenCalled();
   });
 }); 

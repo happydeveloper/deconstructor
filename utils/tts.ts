@@ -66,7 +66,6 @@ export function detectLanguage(text: string): "ko" | "en" {
 }
 
 export function speak(text: string, lang?: string) {
-  // TTS 상태 확인
   const store = getDefaultStore();
   const ttsEnabled = store.get(ttsEnabledAtom);
 
@@ -82,14 +81,10 @@ export function speak(text: string, lang?: string) {
 }
 
 export function speakSequentially(texts: string[], langs?: string[]) {
-  // TTS 상태 확인
   const store = getDefaultStore();
   const ttsEnabled = store.get(ttsEnabledAtom);
 
-  if (!ttsEnabled) {
-    console.log('TTS가 비활성화되어 있어 실행되지 않음');
-    return;
-  }
+  if (!ttsEnabled) return;
 
   let currentIndex = 0;
   

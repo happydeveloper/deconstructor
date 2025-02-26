@@ -3,43 +3,71 @@
 import { Handle, Position } from "@xyflow/react";
 import { useAtom } from "jotai";
 import { ttsEnabledAtom } from "../tts-toggle";
-import { speakSequentially } from "@/utils/tts";
-import { Volume2 } from "lucide-react";
+import { speak, speakSequentially } from "@/utils/tts";
+import { TTSButton } from "../ui/tts-button";
 
-interface CombinedNodeProps {
-  data: { 
-    text: string; 
-    definition: string;
-  };
+interface NodeData {
+  text: string;
+  definition: string;
 }
 
-export function CombinedNode({ data }: CombinedNodeProps) {
+interface TextProps {
+  text: string;
+  className?: string;
+  onClick: (e: React.MouseEvent) => void;
+  title: string;
+}
+
+function Text({ text, className = "", onClick, title }: TextProps) {
+  return (
+    <p 
+      onClick={onClick}
+      className={`cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 text-card-foreground ${className}`}
+      title={title}
+    >
+      {text}
+    </p>
+  );
+}
+
+export function CombinedNode({ data }: { data: NodeData }) {
   const [ttsEnabled] = useAtom(ttsEnabledAtom);
 
-  const handleSpeak = () => {
-    console.log('TTS 상태:', ttsEnabled);
+  const handleSpeak = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (!ttsEnabled) return;
     speakSequentially([data.text, data.definition]);
   };
 
+  const handleDefinitionSpeak = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!ttsEnabled) return;
+    speak(data.definition);
+  };
+
   return (
-    <div className="flex flex-col items-stretch transition-all duration-1000">
-      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-800 p-4">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-xl font-bold text-gray-900 dark:text-gray-50">
-            {data.text}
-          </span>
-          <button
-            onClick={handleSpeak}
-            className="p-1.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white"
-            title="발음 듣기"
-          >
-            <Volume2 size={16} />
-          </button>
+    <div className="flex flex-col items-stretch">
+      <div className="px-4 py-2 rounded-lg bg-card border border-border max-w-[250px]">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <Text
+              text={data.text}
+              className="text-xl font-serif"
+              onClick={handleSpeak}
+              title="클릭하여 전체 발음 듣기"
+            />
+            <TTSButton 
+              onClick={handleDefinitionSpeak}
+              enabled={ttsEnabled}
+            />
+          </div>
+          <Text
+            text={data.definition}
+            className="text-sm"
+            onClick={handleDefinitionSpeak}
+            title="클릭하여 정의 듣기"
+          />
         </div>
-        <p className="text-sm text-gray-600 dark:text-gray-300">
-          {data.definition}
-        </p>
       </div>
       <Handle type="target" position={Position.Top} style={{ opacity: 0 }} />
       <Handle type="source" position={Position.Bottom} style={{ opacity: 0 }} />
