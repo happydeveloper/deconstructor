@@ -1,13 +1,17 @@
 import type { Metadata } from "next";
-import { Noto_Serif } from "next/font/google";
+import { Inter } from "next/font/google";
+import { Noto_Sans_KR } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 import Outbound from "@/components/outbound";
 import { Providers } from "@/components/providers";
 import { Analytics } from '@vercel/analytics/react';
 
-const notoSerif = Noto_Serif({
-  subsets: ["latin"],
+const inter = Inter({ subsets: ["latin"] });
+const notoSansKr = Noto_Sans_KR({ 
+  weight: ['400', '500', '700'],
+  subsets: ['latin'],
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
@@ -45,7 +49,7 @@ export default function RootLayout({
           taggedEvents
         /> */}
       </head>
-      <body className={`${notoSerif.className} antialiased bluelight`}>
+      <body className={`${inter.className} ${notoSansKr.className} antialiased bluelight`}>
         <Outbound />
         <Providers>
           {children}

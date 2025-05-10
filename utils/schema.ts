@@ -9,6 +9,7 @@ export const wordSchema = z.object({
       originalWord: z.string(),
       origin: z.string(),
       meaning: z.string(),
+      partOfSpeech: z.string(),
     })
   ),
   combinations: z
@@ -20,6 +21,7 @@ export const wordSchema = z.object({
             text: z.string(),
             definition: z.string(),
             sourceIds: z.array(z.string()),
+            partOfSpeech: z.string(),
           })
         )
         .nonempty()

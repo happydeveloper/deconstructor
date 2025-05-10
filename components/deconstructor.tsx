@@ -29,18 +29,45 @@ import { speak, speakSequentially } from "@/utils/tts";
 
 const isLoadingAtom = atom(false);
 
-const WordChunkNode = ({ data }: { data: { text: string } }) => {
+const WordChunkNode = ({ data }: { data: { text: string; partOfSpeech?: string } }) => {
   const [isLoading] = useAtom(isLoadingAtom);
   
+  // 품사별 스타일 매핑
+  const getPartOfSpeechStyle = (partOfSpeech?: string) => {
+    const styles = {
+      // 한글 품사
+      '명사': 'bg-blue-100 dark:bg-blue-900',
+      '대명사': 'bg-blue-100 dark:bg-blue-900',
+      '수사': 'bg-blue-100 dark:bg-blue-900',
+      '동사': 'bg-yellow-100 dark:bg-yellow-900',
+      '형용사': 'bg-green-100 dark:bg-green-900',
+      '관형사': 'bg-purple-100 dark:bg-purple-900',
+      '부사': 'bg-pink-100 dark:bg-pink-900',
+      '감탄사': 'bg-red-100 dark:bg-red-900',
+      '조사': 'bg-purple-100 dark:bg-purple-900',
+      
+      // 영어 품사
+      'noun': 'bg-blue-100 dark:bg-blue-900',
+      'pronoun': 'bg-blue-100 dark:bg-blue-900',
+      'verb': 'bg-yellow-100 dark:bg-yellow-900',
+      'adjective': 'bg-green-100 dark:bg-green-900',
+      'adverb': 'bg-pink-100 dark:bg-pink-900',
+      'preposition': 'bg-purple-100 dark:bg-purple-900',
+      'conjunction': 'bg-orange-100 dark:bg-orange-900',
+      'article': 'bg-gray-100 dark:bg-gray-700',
+      'interjection': 'bg-red-100 dark:bg-red-900'
+    };
+    
+    return styles[partOfSpeech as keyof typeof styles] || 'bg-card';
+  };
+
   const handleNodeClick = async () => {
     try {
-      // 클립보드에 복사
       await navigator.clipboard.writeText(data.text);
       toast.success('클립보드에 복사되었습니다', {
         description: '이 단어를 분석합니다...'
       });
 
-      // 입력창에 설정하고 분석 실행
       const input = document.querySelector('[data-word-input="true"]') as HTMLInputElement;
       const analyzeButton = document.querySelector('[data-analyze-button="true"]') as HTMLButtonElement;
       
@@ -49,7 +76,7 @@ const WordChunkNode = ({ data }: { data: { text: string } }) => {
         input.focus();
         setTimeout(() => {
           analyzeButton.click();
-        }, 100); // 약간의 딜레이를 주어 UI 업데이트가 보이도록 함
+        }, 100);
       }
     } catch (error) {
       console.error('클립보드 복사 실패:', error);
@@ -64,23 +91,33 @@ const WordChunkNode = ({ data }: { data: { text: string } }) => {
     speak(data.text);
   };
 
+  const style = getPartOfSpeechStyle(data.partOfSpeech);
+  const isKorean = /[가-힣]/.test(data.text);
+
   return (
     <div className={`flex flex-col items-center transition-all duration-1000 ${
       isLoading ? "opacity-0 blur-[20px]" : ""
     }`}>
       <div 
-        className="bg-card rounded-lg p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group"
+        className={`rounded-lg p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group ${style}`}
         onClick={handleNodeClick}
-        title="클릭하여 이 단어 분석하기"
+        title={`클릭하여 이 단어 분석하기${data.partOfSpeech ? ` (${data.partOfSpeech})` : ''}`}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col items-center gap-1">
           <span 
             onClick={handleSpeak}
-            className="text-xl font-serif cursor-pointer text-card-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400"
+            className={`text-xl cursor-pointer text-card-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 ${
+              data.partOfSpeech === 'verb' || data.partOfSpeech === '동사' ? 'font-bold' : ''
+            } ${isKorean ? 'font-noto-sans-kr' : 'font-serif'}`}
             title="클릭하여 발음 듣기"
           >
             {data.text}
           </span>
+          {data.partOfSpeech && (
+            <span className="text-xs text-muted-foreground">
+              {data.partOfSpeech}
+            </span>
+          )}
         </div>
       </div>
       <div className="w-full h-3 border border-t-0 border-gray-400 dark:border-gray-800" />
@@ -431,7 +468,10 @@ function createInitialNodes(
       id: part.id,
       type: "wordChunk",
       position: { x: 0, y: 0 },
-      data: { text: part.text },
+      data: { 
+        text: part.text,
+        partOfSpeech: part.partOfSpeech 
+      },
     });
 
     // Origin node - position relative to word chunk width
@@ -463,7 +503,7 @@ function createInitialNodes(
 
   // Add combinations layer by layer
   definition.combinations.forEach((layer, layerIndex) => {
-    const y = (layerIndex + 2) * verticalSpacing; // +2 to leave space for word chunks and origins
+    const y = (layerIndex + 2) * verticalSpacing;
 
     layer.forEach((combination) => {
       // Add combination node
@@ -474,6 +514,7 @@ function createInitialNodes(
         data: {
           text: combination.text,
           definition: combination.definition,
+          partOfSpeech: combination.partOfSpeech
         },
       });
 

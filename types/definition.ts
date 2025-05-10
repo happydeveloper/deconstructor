@@ -4,6 +4,7 @@ export interface Part {
   originalWord: string;
   origin: string;
   meaning: string;
+  partOfSpeech: string;
 }
 
 export interface Combination {
@@ -11,6 +12,7 @@ export interface Combination {
   text: string;
   definition: string;
   sourceIds: string[];
+  partOfSpeech: string;
 }
 
 export interface Definition {
@@ -26,6 +28,7 @@ export const defaultDefinition: Definition = {
     id: "default",
     text: "",
     definition: "",
-    sourceIds: []
+    sourceIds: [],
+    partOfSpeech: "noun"
   }]]
 }; 
